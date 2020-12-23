@@ -1,0 +1,53 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+echo
+echo "==//====================================================================="
+echo "4. Quan ly AppAdmin"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#section-8"
+echo "/------------------------------------------------------------------------/"
+echo
+echo "/-----------------------------------------------------------------------/"
+echo "phpMyAdmin: http://$ip:$port_admin/phpmyadmin"
+echo "-------------------------------------------------------------------------"
+echo "PortAdmin: $port_admin"
+echo "Username: admin"
+echo "Password auth: $ad_password"
+echo "Password admin mysql: $db_admin_password"
+echo "/-----------------------------------------------------------------------/"
+echo
+options=(
+    "Doi Port Admin" 
+    "Danh sach User" 
+    "Them User" 
+    "Doi Password" 
+    "Xoa User" 
+    "Tang so lan login failed"
+)
+PS3="
+Nhap lua chon cua ban (1-${#options[@]}) [0=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/etc/larvps/menu/action/app_admin/change_port'
+            ;;
+        "${options[1]}")
+            '/etc/larvps/menu/action/app_admin/list'
+            ;;
+        "${options[2]}")
+            '/etc/larvps/menu/action/app_admin/create_user'
+            ;;
+        "${options[3]}")
+            '/etc/larvps/menu/action/app_admin/change_password'
+            ;;
+        "${options[4]}")
+            '/etc/larvps/menu/action/app_admin/delete_user'
+            ;;
+        "${options[5]}")
+            '/etc/larvps/menu/action/app_admin/login_failed'
+            ;;
+        *) larvps;;
+    esac
+done
+

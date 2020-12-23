@@ -1,0 +1,14 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "17. Quan ly Log > Xoa log"
+echo "/-----------------------------------------------------------------------/"
+
+echo " " > /var/log/mysql/mysql.log
+echo " " > /var/log/php-fpm/error.log
+echo " " > /var/log/nginx/error.log
+echo "Da xoa log"
+sleep 3
+action_log_manager

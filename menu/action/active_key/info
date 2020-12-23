@@ -1,0 +1,12 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+. /etc/larvps/.key.conf
+clear
+echo "-//----------------------------------------------------------------------"
+echo "25. Active Key > Thong tin"
+echo "-------------------------------------------------------------------------"
+echo "Key: $key"
+echo "Ban co the kiem tra thong tin tai: "
+echo "https://larvps.com/tools/active-key"
+echo "-------------------------------------------------------------------------"

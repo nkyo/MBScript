@@ -1,0 +1,32 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "-------------------------------------------------------------------------"
+echo "Backup Database"
+echo "-------------------------------------------------------------------------"
+echo ""
+echo "Danh sách Database"
+mysql -u admin -p$db_admin_password -e "show databases where \`database\` not in('information_schema', 'test', 'sys', 'phpmyadmin', 'mysql', 'performance_schema')"
+echo
+
+read -p "Nhập tên database bạn muốn backup: " database
+read -p "Xác nhận backup database $database? (y/n): " confirm
+
+if [ "$database" = "" ]; then
+    exit
+    action_database
+fi
+
+if [[ "$confirm" = "y" ]]; then
+    date=$(date +"%d-%m-%Y")
+    name="${date}.${database}"
+    mysqldump -u admin -p$db_admin_password --single-transaction --quick --lock-tables=false $database | gzip > "/usr/share/nginx/larvps/backup/db/$name.gz"
+    clear
+    echo "Đã backup database $database." 
+    echo "- Tất cả file backup database được lưu tại: /usr/share/nginx/larvps/backup/db"
+    echo "- Tải $database: http://$ip:$port_admin/backup/db/$name.gz"
+    echo
+    action_database
+fi
+clear
+action_database

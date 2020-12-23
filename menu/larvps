@@ -1,0 +1,154 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/syntax
+. /etc/larvps/menu/functions
+
+if [[ ! $1 ]]; then
+   clear
+fi
+
+echo "========================================================================="
+echo "                LarVPS v$version - Cong cu quan ly VPS"
+echo "                      LarVPS.com - version: Free"
+echo "-------------------------------------------------------------------------"
+echo "Status: $status | Disk: ${use_disk}/${total_disk} GB | Ram: ${use_ram}/${total_ram} MB | Swap: ${use_swap}/${total_swap} MB" 
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation"
+echo "//---------------------------------------------------------------------//"
+echo
+options=(
+    "Quan ly Domain" #0
+    "Quan ly Let's Encrypt" #1
+    "Quan ly SSH/SFTP" #2
+    "Quan ly AppAdmin" #3
+    "Quan ly Database" #4
+    "Quan ly PHP" #5
+    "Quan ly Nginx" #6
+    "Quan ly Fail2ban" #7
+    "Quan ly Application" #8
+    "Quan ly Syntax" #9
+    "Quan ly Utility" #10
+
+    "Quan ly Crontab" #11
+    "Quan ly Cache" #12
+    "Quan ly Swap" #13
+    "Quan ly Port" #14
+    "Quan ly Disk" #15
+    "Quan ly Log" #16
+    "Quan ly Wordpress" #17
+    "Quan ly Image" #18
+    "Quan ly Telegram" #19
+    "Thiep lap SSL Paid" #20
+    "Mod Security" #21
+    "Thong tin VPS" #22
+    "Cap nhat VPS" #23
+    "Active Key" #24
+    "Backup & Restore" #25
+    "Alias public_html" #26
+    "Duplicate website" #27
+    "File Manager"
+)
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [Ctrl+C=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/etc/larvps/menu/domain'
+            ;;
+        "${options[1]}")
+            '/etc/larvps/menu/lets_encrypt'
+            ;;
+        "${options[2]}")
+            '/etc/larvps/menu/ssh'
+            ;;
+        "${options[3]}")
+            '/etc/larvps/menu/app_admin'
+            ;;
+        "${options[4]}")
+            '/etc/larvps/menu/database'
+            ;;
+        "${options[5]}")
+            '/etc/larvps/menu/php_manager'
+            ;;
+        "${options[6]}")
+            '/etc/larvps/menu/nginx_manager'
+            ;;
+        "${options[7]}")
+            '/etc/larvps/menu/fail2ban'
+            ;;
+        "${options[8]}")
+            '/etc/larvps/menu/application'
+            ;;
+        "${options[9]}")
+            '/etc/larvps/menu/syntax_manager'
+            ;;
+        "${options[10]}")
+            '/etc/larvps/menu/utility'
+            ;;
+        "${options[11]}")
+            '/etc/larvps/menu/crontab'
+            ;;
+        "${options[12]}")
+            '/etc/larvps/menu/cache'
+            ;;
+        "${options[13]}")
+            '/etc/larvps/menu/swap'
+            ;;
+        "${options[14]}")
+            '/etc/larvps/menu/port'
+            ;;
+        "${options[15]}")
+            '/etc/larvps/menu/disk_manager'
+            ;;
+        "${options[16]}")
+            '/etc/larvps/menu/log_manager'
+            ;;
+        "${options[17]}")
+            '/etc/larvps/menu/wp_manager'
+            ;;
+        "${options[18]}")
+            '/etc/larvps/menu/image_manager'
+            ;;
+        "${options[19]}")
+            echo "Tinh nang danh cho Active Plan"
+            echo "Nang cap: https://larvps.com/pages/pricing"
+            ;;
+        "${options[20]}")
+            '/etc/larvps/menu/ssl_manager'
+            ;;
+        "${options[21]}")
+            echo "Tinh nang danh cho Active Plan"
+            echo "Nang cap: https://larvps.com/pages/pricing"
+            ;;
+        "${options[22]}")
+            '/etc/larvps/menu/info'
+            ;;
+        "${options[23]}")
+            '/etc/larvps/menu/larvps_update'
+            ;;
+        "${options[24]}")
+            '/etc/larvps/menu/active_key'
+            ;;
+        "${options[25]}")
+            echo "Tinh nang danh cho Active Plan"
+            echo "Nang cap: https://larvps.com/pages/pricing"
+            ;;
+        "${options[26]}")
+            '/etc/larvps/menu/public_html'
+            ;;
+        "${options[27]}")
+            echo "Tinh nang danh cho Active Plan"
+            echo "Nang cap: https://larvps.com/pages/pricing"
+            ;;
+        "${options[28]}")
+            echo "Tinh nang danh cho Active Plan"
+            echo "Nang cap: https://larvps.com/pages/pricing"
+            ;;
+        "${options[29]}")
+            echo "Tinh nang danh cho Active Plan"
+            echo "Nang cap: https://larvps.com/pages/pricing"
+            ;;
+        *) exit 1;;
+    esac
+done

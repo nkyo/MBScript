@@ -1,0 +1,18 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "18. Quan ly Wordpress > Delete comment spam"
+echo "/-----------------------------------------------------------------------/"
+echo
+
+get_choose_domain
+
+echo
+echo "Dang tien hanh xoa comment (spam) $domain"
+wp comment delete $(wp comment list --status=spam --format=ids --path=$path --allow-root --force) --path=$path --allow-root
+wp cache flush --path=$path --allow-root
+wp rewrite flush --path=$path --allow-root
+echo
+action_wp_manager

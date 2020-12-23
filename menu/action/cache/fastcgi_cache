@@ -1,0 +1,8 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "//---------------------------------------------------------------------//"
+echo "13. Quan ly Cache > Fastcgi Cache" 
+echo "/-----------------------------------------------------------------------/"
+

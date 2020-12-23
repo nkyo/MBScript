@@ -1,0 +1,21 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//--------------------------------------------------------------------"
+echo "13. Quan ly cache > Xoa cache"
+echo "/----------------------------------------------------------------------/"
+echo
+read -p "Xac nhan xoa toan bo cache? (y/N): " confirm
+
+if [[ "$confirm" = "" ]]; then
+    action_cache
+fi
+
+if [[ "$confirm" = "y" ]]; then
+mkdir -p /usr/share/nginx/larvps/cache_clear && echo "<?php opcache_reset(); echo 'Da xoa cache thanh cong'; ?>" > /usr/share/nginx/larvps/cache_clear/opcache.php
+curl -u admin:$ad_password http://$ip:$port_admin/cache_clear/opcache.php
+sleep 3
+action_cache
+fi
+action_cache

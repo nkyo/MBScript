@@ -1,0 +1,74 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "//---------------------------------------------------------------------//"
+echo "Cap nhat LarVPS"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#item-23-61"
+echo "/-----------------------------------------------------------------------/"
+echo
+
+latest_version=$(curl -s https://larvps.com/scripts/info | grep "latest_version=" | cut -f2 -d'=')
+if [[ "$latest_version" = "$version" ]]; then
+echo "-----------------------------------------------------------------------"
+echo "** Ban dang su dung phien ban moi nhat. **"
+echo "-----------------------------------------------------------------------"
+echo
+else
+    read -p "Xac nhan nang cap len phien ban $latest_version? (y/n): " confirm
+    if [[ "$confirm" = 'y' ]]; then
+        echo "Dang tien hanh cap nhat..."
+        sleep 1
+cd
+rm -rf menu.zip
+rm -rf menu
+wget "https://larvps.com/scripts/menu.zip" -O menu.zip
+
+if [[ $? -ne 0 ]]; then
+    echo "Cap nhat that bai"
+    sleep 3;
+    larvps
+fi
+
+unzip -o menu.zip
+clear
+cd menu
+mv -f larvps /usr/bin/
+rm -rf /etc/larvps/menu
+cd ..
+mv menu /etc/larvps/
+rm -rf menu.zip
+rm -rf __MACOSX
+
+mv -f /etc/larvps/menu/action/shortcut/add /usr/bin/add
+mv -f /etc/larvps/menu/action/shortcut/delete /usr/bin/delete
+mv -f /etc/larvps/menu/action/shortcut/list /usr/bin/list
+mv -f /etc/larvps/menu/action/shortcut/restart /usr/bin/restart
+mv -f /etc/larvps/menu/action/shortcut/stop /usr/bin/stop
+mv -f /etc/larvps/menu/action/shortcut/backup /usr/bin/backup
+mv -f /etc/larvps/menu/action/shortcut/check /usr/bin/check
+
+echo "Dang tien hanh cap nhat. Vui long doi..."
+sleep 1
+
+# Core
+"/etc/larvps/menu/update_core" >> /dev/null 2>&1
+
+sed -i '/version=/d' /etc/larvps/.larvps.conf
+echo "version=$latest_version" >>  /etc/larvps/.larvps.conf
+
+echo "Da cap nhat thanh cong...Vui long khong thoat trong tien trinh nay."
+sleep 1
+
+clear
+echo "/-----------------------------------------------------------------------/"
+echo "VPS cua ban da duoc cap nhat len phien ban moi nhat."
+echo "Cam on ban da lua chon LarVPS."
+echo "/-----------------------------------------------------------------------/"
+echo
+sleep 1
+larvps
+    fi
+fi
+. /etc/larvps/menu/larvps_update

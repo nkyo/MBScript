@@ -1,0 +1,61 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "2. Quan ly Let's Encrypt > SSL Alias Domain"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#item-6-10"
+echo "/-----------------------------------------------------------------------/"
+echo
+
+nginx="$(systemctl status nginx.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+
+if [[ "$nginx" != "active" ]]; then
+    clear
+    echo "Nginx hien tai khong hoat dong. Vui long kiem tra lai."
+    echo
+    action_lets_encrypt
+fi
+
+echo "Huong dan:"
+echo "- Domain A la domain Root: (Domain da cai SSL Let's Encrypt)"
+
+echo "- Domain B la danh sach cac domain Alias can cap SSL (cach nhau boi dau phay)."
+# echo "Domain B yeu cau can cai dat ssl truoc do"
+
+echo 
+read -p "Nhap domain A Root: " domain_a
+
+if [[ ! -f /etc/larvps/lets_encrypt/${domain_a}.conf ]]; then
+clear
+echo "Vui long cai SSL Let's cho Domain B truoc khi su dung."
+sleep 3
+action_lets_encrypt
+fi
+
+echo "Danh sach duoc tim thay, ban Copy danh sach va Paste vao ben duoi:"
+list_domains=$(grep --m=2 "server_name" /etc/nginx/conf.d/$domain_a.conf | grep  -v "www" | sed 's/server\_name//' |  sed "s/$domain_a//" | sed 's/\;//' | xargs | sed 's/\ /,/g')
+echo 
+echo $list_domains
+echo 
+
+read -p "Nhap danh sach domain (cach nhau boi dau phay): " domain_b
+
+rm -rf /etc/letsencrypt/renewal/${domain_b}.conf
+rm -rf /etc/letsencrypt/live/${domain_b}
+rm -rf /etc/letsencrypt/archive/${domain_b}
+
+certbot certonly --nginx --force-renewal --expand -d "$domain_a,$domain_b"
+
+echo "Xem huong dan: https://larvps.com/articles/huong-dan-them-alias-domain-kem-ssl"
+read -p "Cap nhat Folder SSL cho Root B: " folder
+
+old_folder=$(grep --m=1 "fullchain" /etc/nginx/conf.d/${domain_a}.conf | xargs | cut -f5 -d'/');
+if [[ "$old_folder" ]]; then
+sed -i "s/$old_folder/$folder/g" /etc/nginx/conf.d/$domain_a.conf
+fi
+
+restart_nginx
+
+action_lets_encrypt

@@ -1,0 +1,73 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "==//====================================================================="
+echo "23. Phan quyen Chown/Chmod"
+echo "/-----------------------------------------------------------------------/"
+echo
+choose_domain
+
+if [ "$domain" = '' ]; then
+    clear
+    echo "Ban chua chon domain."
+    echo
+    larvps
+fi
+
+if [ "$domain" = "${domain/.}" ]; then
+    clear
+    echo "Domain ban chon khong dung dinh dang."
+    echo
+    larvps
+fi
+
+# kiem tra ton tai
+path="/etc/larvps/user/.$domain.conf"
+if [[ ! -f "$path" ]]; then
+    clear
+    echo "Domain khong ton tai tren VPS."
+    echo
+    larvps
+fi
+
+read -p "Xac nhan phan quyen cho domain: $domain? (y/n): " confirm
+
+if [[ "$confirm" = "y" ]]; then
+    username=${domain//[-._]/}
+    path="/home/$username/$domain"
+    if [[ -d "$path" ]]; then
+        chown -hR $username:$username /home/$username/$domain/public_html
+        chmod -R a=r,u+w,a+X /home/$username/$domain/public_html
+        chown nginx:nginx /var/lib/php/session
+        chown nginx:nginx /var/lib/php/opcache
+
+        if [[ -f /home/$username/$domain/public_html/wp-config.php ]]; then
+            chmod 400 /home/$username/$domain/public_html/wp-config.php
+        fi
+        if [[ -f /home/$username/$domain/public_html/index.php ]]; then
+            chmod 444 /home/$username/$domain/public_html/index.php
+        fi
+        if [[ -f /home/$username/$domain/public_html/public/index.php ]]; then
+            chmod 444 /home/$username/$domain/public_html/public/index.php
+        fi
+
+        chmod 755 /var/lib/php/session
+        echo "-------------------------------------------------------------------------"
+        echo "Da phan lai quyen: $username cho domain: $domain"
+        echo "Đang quay lại menu..."
+        sleep 3
+        larvps
+    else
+        echo
+        echo "Domain khong ton tai tren VPS"
+        echo "Dang quay lai Menu LarVPS..."
+        sleep 3
+        larvps
+    fi
+else
+    echo
+    echo "Dang quay lai Menu LarVPS..."
+    sleep 3
+    larvps
+fi

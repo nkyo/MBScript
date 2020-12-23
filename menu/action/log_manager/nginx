@@ -1,0 +1,11 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "17. Quan ly Log > Nginx"
+echo "/-----------------------------------------------------------------------/"
+
+cat /var/log/nginx/error.log | sort -r | head -15
+sleep 3
+action_log_manager

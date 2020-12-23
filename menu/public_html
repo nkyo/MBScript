@@ -1,0 +1,40 @@
+#!/bin/bash
+. /etc/larvps/menu/functions
+echo
+echo "==//====================================================================="
+echo "27. Truy cap public_html"
+echo "/-----------------------------------------------------------------------/"
+echo
+cd
+get_choose_domain
+
+read -p "Dat ten alias bat ky (ex: larvps.com) [0=Thoat]: " name
+
+if [[ "$name" = "" || "$name" = "0" ]]; then
+	larvps
+fi
+
+if [[ -d /root/$name ]]; then
+echo "Ten dinh danh da ton tai"
+read -p "Ban co muon xoa? (y/n) " confirm
+
+if [[ "$confirm" = "y" ]]; then
+rm -rf /root/$name
+echo "Da xoa"
+fi
+
+sleep 3
+action_access_public
+fi
+
+ln -s $path $name
+
+echo
+echo "-------------------------------------------------------------------------"
+echo "Da tao Alias (dinh danh) den thu muc public_html của $domain"
+echo "Su dung lenh sau: cd $name"
+echo "-------------------------------------------------------------------------"
+echo
+echo "Dang tien hanh thoat"
+sleep 5
+larvps

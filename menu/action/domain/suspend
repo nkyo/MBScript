@@ -1,0 +1,67 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//-------------------------------------------------------------------//"
+echo "1. Quan ly Domain > Mo/Khoa domain"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#item-5"
+echo "/-----------------------------------------------------------------------/"
+echo
+get_choose_domain
+
+if [[ "$domain" = "0" ]]; then
+    clear
+    action_domain
+fi
+
+if [ "$domain" = '' ]; then
+    clear
+    echo "Ban chua nhap Domain."
+    echo
+    action_domain
+fi
+
+if [ "$domain" = "${domain/.}" ]; then
+    clear
+    echo "Domain ban nhap khong dung dinh dang."
+    echo
+    action_domain
+fi
+
+path_nginx="/etc/nginx/conf.d/$domain.conf"
+path_suppend="${path_nginx}.suppend"
+
+# open
+if [[ -f $path_suppend ]]; then
+read -p "Domain $domain dang khoa, ban co muon mo khoa? (y/n): " confirm_open
+
+if [[ "$confirm_open" = "y" ]]; then
+mv $path_suppend $path_nginx
+nginx -t && service nginx reload
+clear
+echo "Da mo domain $domain"
+action_domain
+else
+action_domain
+fi
+
+fi
+
+# suppend
+if [[ -f $path_nginx ]]; then
+read -p "Xac nhan khoa domain $domain (y/n): " confirm
+
+if [[ "$confirm" = "y" ]]; then
+mv $path_nginx $path_suppend
+nginx -t && service nginx reload
+clear
+echo "Da khoa domain $domain"
+action_domain
+else
+action_domain
+fi
+
+fi
+
+

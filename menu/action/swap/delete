@@ -1,0 +1,32 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "14. Quan ly Swap > Xoa Swap"
+echo "/-----------------------------------------------------------------------/"
+echo ""
+read -p "Xac nhan xoa Swap? (y/n): " confirm
+if [[ "$confirm" = 'y' ]]; then
+
+    if [[ -f "/var/swap.1" ]]; then
+        echo "Dang tien hanh xoa swap..."
+        sleep 1
+        swapoff -a -v
+        rm -rf /var/swap.1
+        sed -i '/swap.1/d' /etc/fstab
+        clear
+        action_swap
+    else
+        clear
+        echo "Swap khong ton tai..."
+        sleep 3
+        action_swap
+    fi
+    
+else
+    clear
+    action_swap
+fi
+
+    

@@ -1,0 +1,12 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "--//---------------------------------------------------------------------"
+echo "16. Quan ly Disk > Home"
+echo "/-----------------------------------------------------------------------/"
+echo
+cd /home && du -sh */
+echo "-------------------------------------------------------------------------"
+echo "Tong: $(du -sh /home)"
+sleep 3
+action_disk_manager

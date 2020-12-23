@@ -1,0 +1,27 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "18. Quan ly Wordpress > Update All"
+echo "/-----------------------------------------------------------------------/"
+echo
+
+if [ "$(ls -At /etc/larvps/user)" ]; then
+	i=1
+	for entry in `ls -A /etc/larvps/user`; do
+	    domain=$( echo $entry | sed 's/^.//' | sed 's/.conf//')
+	    username=${domain//[-._]/}
+	    path="/home/$username/$domain/public_html/"
+	    echo "Dang tien hanh cap nhat cho $domain"
+	    wp plugin update --all --path=$path --allow-root
+	    wp theme update --all --path=$path --allow-root
+	    wp core update --path=$path --allow-root
+	    wp core update-db --path=$path --allow-root
+	    wp cache flush --path=$path --allow-root
+	    wp rewrite flush --path=$path --allow-root
+	    larvps chmod $domain
+	done
+fi
+
+action_wp_manager

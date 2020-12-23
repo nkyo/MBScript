@@ -1,0 +1,44 @@
+#!/bin/bash
+. /etc/larvps/menu/functions
+
+echo "==//====================================================================="
+echo "10. Quan ly Syntax"
+echo "-------------------------------------------------------------------------"
+echo "Nginx     : $(systemctl status nginx.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "PHP-FPM   : $(systemctl status php-fpm.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "MariaDB   : $(systemctl status mariadb.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "SSHD      : $(systemctl status sshd.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "Fail2Ban  : $(systemctl status fail2ban.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "Crond     : $(systemctl status crond.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "/-----------------------------------------------------------------------/"
+echo
+options=(
+    "Syntax LarVPS"
+    "Start"
+    "Restart"
+    "Stop"
+    "Status"
+)
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [0=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/etc/larvps/menu/action/syntax_manager/list'
+            ;;
+        "${options[1]}")
+            '/etc/larvps/menu/action/syntax_manager/start'            
+            ;;
+        "${options[2]}")
+            '/etc/larvps/menu/action/syntax_manager/restart'            
+            ;;
+        "${options[3]}")
+            '/etc/larvps/menu/action/syntax_manager/stop'            
+            ;;
+        "${options[4]}")
+            '/etc/larvps/menu/action/syntax_manager/status'            
+            ;;
+        *) larvps;;
+    esac
+done

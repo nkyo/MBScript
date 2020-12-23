@@ -1,0 +1,93 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+. /etc/larvps/menu/active_check
+
+clear
+
+echo "--//---------------------------------------------------------------------"
+echo "11. Quan ly Utility > Chuyen Website tu HocVPS/VPSSIM/TinoVPS"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#item-14-75"
+echo "/-----------------------------------------------------------------------/"
+echo
+read -p "IP cua HocVPS/VPSSIM/TinoVPS: " ip_address
+read -p "Port ssh (ex: 22): " port_ssh
+read -p "Domain: " domain
+echo "Nhap thong tin database cua domain HocVPS/VPSSIM/TinoVPS:"
+echo
+read -p "DB_NAME: " db_name
+read -p "DB_USER: " db_user
+read -p "DB_PASSWORD: " db_password
+username=${domain//[-._]/}
+
+mkdir -p /home/$username/$domain/public_html
+mkdir -p /home/$username/$domain/logs
+mkdir -p /home/$username/$domain/tmp
+mkdir -p /home/$username/$domain/ssl
+mkdir -p /home/$username/$domain/session
+mkdir -p /home/$username/$domain/restore
+
+chmod 755 /home/$username
+chmod 755 /home/$username/$domain/public_html
+chmod 700 /home/$username/$domain/logs
+chmod 700 /home/$username/$domain/tmp
+chmod 700 /home/$username/$domain/ssl
+chmod 700 /home/$username/$domain/session
+chmod 700 /home/$username/$domain/restore
+
+echo
+read -p "Xac nhan thong tin tren (y/n): " confirm_transfer
+if [[ "$confirm_transfer" = "y" ]]; then
+clear
+echo "Buoc 1: tien hanh backup"
+echo "Nhap mat khau ket noi voi HocVPS/VPSSIM/TinoVPS:"
+sleep 2
+ssh -p $port_ssh -t root@${ip_address} "ls; mysqldump -u$db_user -p$db_password --single-transaction --quick --lock-tables=false $db_name | gzip > /home/${domain}/public_html/database.tar.gz && tar fcvz /home/${domain}/backup.tar.gz --absolute-names /home/${domain}/public_html/;"
+clear
+echo "Buoc 2: tien hanh restore"
+echo "Nhap mat khau ket noi voi HocVPS/VPSSIM/TinoVPS:"
+sleep 2
+rsync -avzhe "ssh -p $port_ssh" --progress root@${ip_address}:/home/${domain}/backup.tar.gz /home/${username}/${domain}/restore
+
+. /etc/larvps/menu/action/utility/restore_template $domain $db_name $db_user $db_password
+
+#xả nén
+cd /home/${username}/${domain}/restore/
+tar -zxvf backup.tar.gz 
+rm -rf /home/${username}/${domain}/public_html/*
+mv /home/${username}/${domain}/restore/home/${domain}/public_html/* /home/${username}/${domain}/public_html/
+db_url=/home/${username}/${domain}/public_html/database.tar.gz
+zcat $db_url | mysql -u $db_user -p$db_password $db_name
+rm -rf /home/${username}/${domain}/restore/*
+rm -f $db_url
+
+if [[ -f /home/$username/$domain/public_html/wp-config.php ]]; then
+sed -i "/DB_HOST/s/'[^']*'/'localhost'/2" /home/$username/$domain/public_html/wp-config.php
+sed -i "/DB_NAME/s/'[^']*'/'$db_name'/2" /home/$username/$domain/public_html/wp-config.php
+sed -i "/DB_USER/s/'[^']*'/'$db_user'/2" /home/$username/$domain/public_html/wp-config.php
+sed -i "/DB_PASSWORD/s/'[^']*'/'$db_password'/2" /home/$username/$domain/public_html/wp-config.php
+fi
+
+
+# set config user
+sed -i "/db_name/d" /etc/larvps/user/.$domain.conf
+sed -i "/db_user/d" /etc/larvps/user/.$domain.conf
+sed -i "/db_password/d" /etc/larvps/user/.$domain.conf
+echo "db_name=$db_name" >> /etc/larvps/user/.$domain.conf
+echo "db_user=$db_user" >> /etc/larvps/user/.$domain.conf
+echo "db_password=$db_password" >> /etc/larvps/user/.$domain.conf
+
+
+chown -R $username:$username /home/$username/$domain/public_html
+chmod -R a=r,u+w,a+X /home/$username/$domain/public_html
+
+
+sleep 2
+clear
+echo "Hoan thanh"
+echo "Vui long cau hinh SSL Free ở menu 2 neu website ban truoc day co dung SSL."
+echo "Vui long xoa file backup tren HocVPS/VPSSIM/TinoVPS /home/domain.com/backup.tar.gz"
+action_utility
+fi
+

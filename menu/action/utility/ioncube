@@ -1,0 +1,35 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "--//---------------------------------------------------------------------"
+echo "11. Quan ly Utility > IonCube"
+echo "/-----------------------------------------------------------------------/"
+
+if [[ `cat /etc/php.d/00-larvps-custom.ini | grep "ioncube"` ]]; then
+echo "ionCube: Active"
+
+read -p "Ban co muon tat? (y/n): " confirm
+if [[ "$confirm" = "y" ]]; then
+sed -i '/ioncube/d' /etc/php.d/00-larvps-custom.ini
+service php-fpm restart
+clear
+echo "Da tat ionCube"
+action_utility
+fi
+
+else
+echo "ionCube: Inactive"
+
+read -p "Ban co muon bat? (y/n): " confirm
+if [[ "$confirm" = "y" ]]; then
+echo >> /etc/php.d/00-larvps-custom.ini
+echo "zend_extension = /usr/local/ioncube/ioncube_loader_lin_7.4.so" >> /etc/php.d/00-larvps-custom.ini
+service php-fpm restart
+clear
+echo "Da bat ionCube"
+action_utility
+fi
+
+fi
+
+action_utility

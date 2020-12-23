@@ -1,0 +1,51 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+echo
+echo "==//====================================================================="
+echo "13. Quan ly Cache"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#section-9"
+echo "/-----------------------------------------------------------------------/"
+echo
+echo "/-----------------------------------------------------------------------/"
+echo "Opcache GUI: http://$(hostname -I | cut -f1 -d' '):$port_admin/opcache"
+echo "phpMemcachedAdmin: http://$(hostname -I | cut -f1 -d' '):$port_admin/phpmemcachedadmin"
+echo "-------------------------------------------------------------------------"
+echo "Username: admin"
+echo "Password: $ad_password"
+echo "/-----------------------------------------------------------------------/"
+echo
+echo "/-----------------------------------------------------------------------/"
+echo "Zend Opcache : active"
+echo "Memcached    : $(systemctl status memcached.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "Redis        : $(systemctl status redis.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "/-----------------------------------------------------------------------/"
+echo
+options=("Memcached" "Redis" "Zend Opache" "Rocket-Nginx" "Xoa cache")
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [0=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/etc/larvps/menu/action/cache/memcached'
+            ;;
+        "${options[1]}")
+            '/etc/larvps/menu/action/cache/redis'
+            ;;
+        "${options[2]}")
+            '/etc/larvps/menu/action/cache/zend_opcache'
+            ;;
+        # "${options[3]}")
+        #     '/etc/larvps/menu/action/cache/fastcgi_cache'
+        #     ;;
+        "${options[3]}")
+            '/etc/larvps/menu/action/cache/rocket_nginx'
+            ;;
+        "${options[4]}")
+            '/etc/larvps/menu/action/cache/clear_all'
+            ;;
+        *) larvps;;
+    esac
+done
+

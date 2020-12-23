@@ -1,0 +1,67 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "13. Quan ly Cache > Rocket Nginx" 
+echo "/-----------------------------------------------------------------------/"
+echo
+
+choose_domain
+if [ "$domain" = "" ]; then
+    clear
+    echo "Ban chua nhap Domain."
+    echo
+    action_cache
+fi
+
+if [ "$domain" = "${domain/.}" ]; then
+    clear
+    echo "Domain ban nhap khong dung dinh dang."
+    echo
+    action_cache
+fi
+
+# kiem tra ton tai
+path="/etc/larvps/user/.$domain.conf"
+if [[ ! -f "$path" ]]; then
+    clear
+    echo "Domain khong ton tai tren VPS."
+    echo
+    action_cache
+fi
+username=${domain//[-._]/}
+
+
+
+# Kiem tra chua hinh
+sed -i "/#include \/etc\/nginx\/rocket-nginx/d" /etc/nginx/conf.d/$domain.conf
+
+x=$(cat /etc/nginx/conf.d/$domain.conf | grep "include /etc/nginx/rocket-nginx/default.conf" >> /dev/null 2>&1 && echo 1)
+
+if [[ "$x" = "1" ]]; then
+    echo "Domain da duoc cau hinh Rocket-Nginx"
+    read -p "Ban co muon xoa? (y/N) " confirm_remove
+
+    if [[ "$confirm_remove" = 'y' ]]; then
+    echo "Dang tien hanh xoa"
+    sed -i "/rocket-nginx/d" /etc/nginx/conf.d/$domain.conf
+    nginx -t && service nginx restart
+    fi
+    sleep 3
+    action_cache
+else
+    read -p "Xac nhan cau hinh Rocket-Nginx? (y/N) " confirm
+    if [[ "$confirm" != "y" ]]; then
+        action_cache
+    fi
+fi
+
+clear
+echo "Dang tien hanh cau hinh..."
+sleep 1
+sed -i "/error.log;/a include /etc/nginx/rocket-nginx/default.conf;" /etc/nginx/conf.d/$domain.conf
+nginx -t && service nginx restart 
+echo "Da cau hinh Rocket-Nginx cho domain $domain"
+sleep 3
+action_cache

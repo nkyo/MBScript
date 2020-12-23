@@ -1,0 +1,11 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "14. Quan ly Swap > Xem Swap"
+echo "/-----------------------------------------------------------------------/"
+echo
+swapon --show
+sleep 3
+action_swap

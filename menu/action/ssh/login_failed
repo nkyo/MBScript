@@ -1,0 +1,23 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+count=$(cat /etc/fail2ban/jail.d/sshd.local | grep maxretry | cut -f2 -d'=' | xargs)
+echo "--//---------------------------------------------------------------------"
+echo "3. Quan ly SSH/SFTP > SSH login failed"
+echo "/-----------------------------------------------------------------------/"
+echo "So lan cho phep: $count"
+echo ""
+read -p "Nhap so lan login failed se bi khoa IP [ex: 3]: " new_count
+
+if [[ "$new_count" = '0' || "$new_count" = "" ]]; then
+    action_ssh
+fi
+
+sed -i "/maxretry/d" /etc/fail2ban/jail.d/sshd.local
+echo "maxretry=$new_count" >> /etc/fail2ban/jail.d/sshd.local
+
+fail2ban-client reload
+clear
+echo "Hoan thanh."
+action_ssh

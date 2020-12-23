@@ -1,0 +1,67 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "--//---------------------------------------------------------------------"
+echo "2. Quan ly Let's Encrypt > Restore Nginx"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#item-6-11"
+echo "/-----------------------------------------------------------------------/"
+echo
+echo "Canh bao: Day la tinh nang chi su dung khi bi loi cau hinh Nginx domain. 
+Viec restore voi domain dang chay binh thuong se bi STOP SSL."
+echo
+selects=()
+for entry in `ls -At  /etc/larvps/lets_encrypt`; do
+    domain=$( echo $entry | sed 's/.conf//')
+    selects+=("$domain")
+done
+PS3="
+Nhap lua chon cua ban [0=Exit]: "
+select select in ${selects[@]}
+do
+    domain=$select
+    break
+done
+echo
+
+
+if [ "$domain" = "" ]; then
+    clear
+    echo "Ban chua nhap Domain."
+    echo
+    action_lets_encrypt
+fi
+
+if [ "$domain" = "${domain/.}" ]; then
+    clear
+    echo "Domain ban nhap khong dung dinh dang."
+    echo
+    action_lets_encrypt
+fi
+
+# kiem tra ton tai
+path="/etc/larvps/user/.$domain.conf"
+if [[ ! -f "$path" ]]; then
+    clear
+    echo "Domain khong ton tai tren VPS."
+    echo
+    action_lets_encrypt
+fi
+
+sub=0
+check_sub=($(echo $domain | tr '.' "\n"))
+
+if [[ ! -f "/etc/larvps/lets_encrypt_backup/${domain}_https.conf" ]]; then
+    echo "Khong tim thay file backup nginx https"
+    echo
+    action_lets_encrypt
+fi
+
+rm -f /etc/nginx/conf.d/$domain.conf
+cp "/etc/larvps/lets_encrypt_backup/${domain}_https.conf" "/etc/nginx/conf.d/${domain}.conf"
+
+echo "Da restore nginx cho $domain"
+nginx -t && service nginx reload
+
+action_lets_encrypt
+fi

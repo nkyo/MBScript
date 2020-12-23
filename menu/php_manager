@@ -1,0 +1,27 @@
+#!/bin/bash
+. /etc/larvps/menu/functions
+echo
+echo "==//====================================================================="
+echo "6. Quan ly PHP - $(php -v | head -n 1 | cut -d " " -f 2) - $(systemctl status php-fpm.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#section-12"
+echo "/-----------------------------------------------------------------------/"
+echo
+options=("Cau hinh PHP.ini chung" "Cau hinh Pool PHP theo domain" "Thay doi phien ban")
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [0=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/etc/larvps/menu/action/php_manager/php_ini'
+            ;;
+        "${options[1]}")
+            '/etc/larvps/menu/action/php_manager/php_domain'
+            ;;
+        "${options[2]}")
+            '/etc/larvps/menu/action/php_manager/change_version'
+            ;;
+        *) larvps;;
+    esac
+done

@@ -1,0 +1,288 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+
+status="Error"
+nginx="$(systemctl status nginx.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+phpfpm="$(systemctl status php-fpm.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+mariadb="$(systemctl status mariadb.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+if [[ "$nginx" = 'active' ]] || [[ "$phpfpm" = 'active' ]] || [[ "$mariadb" = 'active' ]]; then
+status="OK"
+fi
+
+disk=$(mount|grep ' / '|cut -d' ' -f 1)
+total_disk=$(df -T -h | grep $disk | awk -F ' ' '{print $3}' | tr -d 'a-zA-G')
+use_disk=$(df -T -h | grep $disk | awk -F ' ' '{print $4}' | tr -d 'a-zA-G')
+total_ram=$(free -m | grep "Mem" | awk -F ' ' '{print $2}')
+use_ram=$(free -m | grep "Mem" | awk -F ' ' '{print $3}')
+total_swap=$(free -m | grep "Swap" | awk -F ' ' '{print $2}')
+use_swap=$(free -m | grep "Swap" | awk -F ' ' '{print $3}')
+memAvailable=$(cat /proc/meminfo | grep 'MemAvailable' |cut -f2 -d':' | xargs | cut -f1 -d' ')
+totalSwap=$(cat /proc/meminfo | grep 'SwapTotal' |cut -f2 -d':' | xargs | cut -f1 -d' ')
+freeSwap=$(cat /proc/meminfo | grep 'SwapFree' |cut -f2 -d':' | xargs | cut -f1 -d' ')
+
+
+function list_domain() {
+    if [ "$(ls -At /etc/larvps/user)" ]; then
+    	i=1
+    	for entry in `ls -A /etc/larvps/user`; do
+    	    domain=$( echo $entry | sed 's/^.//' | sed 's/.conf//')
+    	    echo "$i) $domain"
+    		i=$((i+1));
+    	done
+    echo "-------------------------------------------------------------------------"
+    	echo "Tong: $((i-1))"
+    else
+    	clear
+    	echo "Khong co domain nao ton tai tren he thong."
+    	action_domain
+    fi
+}
+
+function choose_domain(){
+	domain=""
+	if [ "$(ls -At /etc/larvps/user)" ]; then
+	selects=()
+	for entry in `ls -A /etc/larvps/user`; do
+	    domain=$( echo $entry | sed 's/^.//' | sed 's/.conf//')
+	    if [ "$domain" != "${domain/.}" ]; then
+	        selects+=("$domain")
+	    fi
+	done
+PS3="
+-//- Nhap lua chon cua ban [0=Thoat]: "
+select select in ${selects[@]}
+do
+	domain=$select
+	index=$REPLY
+	break
+done
+	else
+	clear
+    echo "Khong co domain nao ton tai tren he thong."
+	action_domain
+	fi
+}
+
+
+function get_user(){
+	domain=$1
+	user=$(echo ${domain//[-._]/} | cut -c1-30 )
+	echo $user
+	return 1
+}
+
+function find_domain(){
+	grep -r '/etc/larvps/user/' -e "username=$1" | cut -f1 -d':' | sed 's/\/etc\/larvps\/user\/.//' | sed 's/.conf//'
+}
+
+function choose_user(){
+	if [ "$(ls -At /etc/larvps/user)" ]; then
+	selects=()
+	for entry in `ls -A /etc/larvps/user`; do
+	    domain=$( echo $entry | sed 's/^.//' | sed 's/.conf//')
+	    if [ "$domain" != "${domain/.}" ]; then
+	    	username=${domain//[-._]/}
+	        selects+=("$username")
+	    fi
+	done
+	PS3="
+-//- Nhap lua chon cua ban [0=Thoat]: "
+select select in ${selects[@]}
+do
+	username=$select
+	break
+done
+	else
+	clear
+    echo "Khong co username nao ton tai tren he thong."
+	action_domain
+	fi
+}
+
+function get_choose_domain() {
+choose_domain
+
+if [ "$domain" = "" ]; then
+    clear
+    echo "Ban chua nhap Domain."
+    larvps
+fi
+
+if [ "$domain" = "${domain/.}" ]; then
+    clear
+    echo "Domain ban nhap khong dung dinh dang."
+    larvps
+fi
+
+# kiem tra ton tai
+path="/etc/larvps/user/.$domain.conf"
+if [[ ! -f "$path" ]]; then
+    clear
+    echo "Domain khong ton tai tren VPS."
+    larvps
+fi
+
+username=$(get_user $domain)
+path="/home/$username/$domain/public_html/"
+
+}
+
+function human {
+    local -i bytes=$1;
+    if [[ $bytes -lt 1024 ]]; then
+        echo "${bytes}B"
+    elif [[ $bytes -lt 1048576 ]]; then
+        echo "$(( (bytes + 1023)/1024 ))MB"
+    else
+        echo "$(( (bytes + 1048575)/1048576 ))GB"
+    fi
+}
+
+function action_larvps(){
+	. /etc/larvps/menu/larvps
+}
+
+function action_larvps_update(){
+	. /etc/larvps/menu/larvps_update
+}
+
+function action_domain(){
+	. /etc/larvps/menu/domain
+}
+
+function action_application(){
+	. /etc/larvps/menu/application
+}
+
+function app_admin(){
+	. /etc/larvps/menu/app_admin
+}
+
+function action_source(){
+	. /etc/larvps/menu/source
+}
+
+function action_database(){
+	. /etc/larvps/menu/database
+}
+
+function action_lets_encrypt(){
+	. /etc/larvps/menu/lets_encrypt
+}
+
+function action_ssh(){
+	. /etc/larvps/menu/ssh
+}
+
+function action_utility(){
+	. /etc/larvps/menu/utility
+}
+
+function action_crontab(){
+	. /etc/larvps/menu/crontab
+}
+
+function action_fail2ban(){
+	. /etc/larvps/menu/fail2ban
+}
+
+function action_swap(){
+	. /etc/larvps/menu/swap
+}
+
+function action_permission(){
+	. /etc/larvps/menu/permission
+}
+
+function action_port(){
+	. /etc/larvps/menu/port
+}
+
+function action_cache(){
+	. /etc/larvps/menu/cache
+}
+
+function action_backup_restore(){
+	. /etc/larvps/menu/backup_restore
+}
+
+function action_php_manager(){
+	. /etc/larvps/menu/php_manager
+}
+
+function action_ssl(){
+	. /etc/larvps/menu/ssl
+}
+
+function action_premium(){
+	. /etc/larvps/menu/premium
+}
+
+function action_nginx_manager(){
+	. /etc/larvps/menu/nginx_manager
+}
+
+function action_syntax_manager(){
+	. /etc/larvps/menu/syntax_manager
+}
+
+function action_disk_manager(){
+	. /etc/larvps/menu/disk_manager
+}
+
+function action_telegram_manager(){
+	. /etc/larvps/menu/telegram_manager
+}
+
+function action_wp_manager(){
+	. /etc/larvps/menu/wp_manager
+}
+
+function action_clouflare_manager(){
+	. /etc/larvps/menu/clouflare_manager
+}
+
+function action_image_manager(){
+	. /etc/larvps/menu/image_manager
+}
+
+function action_log_manager(){
+	. /etc/larvps/menu/log_manager
+}
+
+function action_ssl_manager(){
+	. /etc/larvps/menu/ssl_manager
+}
+
+function action_active_key(){
+	. /etc/larvps/menu/active_key
+}
+
+function action_mod_security(){
+	. /etc/larvps/menu/mod_security
+}
+
+function action_access_public(){
+	. /etc/larvps/menu/public_html
+}
+
+function action_duplicate_website(){
+	. /etc/larvps/menu/duplicate_website
+}
+
+function action_file_manager(){
+	. /etc/larvps/menu/file_manager
+}
+
+function restart_nginx(){
+	nginx -t 2>&1
+	if [[ $? == 0 ]]; then
+		systemctl restart nginx.service
+	else
+		echo "Vui long kiem tra lai Nginx. Lenh: nginx -t"
+	fi
+}
+
+function restart_php() {
+systemctl restart php-fpm.service
+}

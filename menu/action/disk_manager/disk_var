@@ -1,0 +1,12 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "--//---------------------------------------------------------------------"
+echo "16. Quan ly Disk > var"
+echo "/-----------------------------------------------------------------------/"
+echo
+cd /var && du -sh */
+echo "-------------------------------------------------------------------------"
+echo "Tong: $(du -sh /var)"
+sleep 3
+action_disk_manager

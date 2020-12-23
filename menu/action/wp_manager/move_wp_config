@@ -1,0 +1,30 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "18. Quan ly Wordpress > Move wp-config.php"
+echo "/-----------------------------------------------------------------------/"
+echo
+
+get_choose_domain
+
+# kiểm tra sự tồn tại của wp-config.php
+path_wp_config=$path'wp-config.php';
+new_path_wp_config="/home/$username/$domain/wp-config.php"
+
+clear
+
+if [[ -f $path_wp_config ]]; then
+mv $path_wp_config $new_path_wp_config
+echo "Thanh cong. wp-config.php cua $domain da duoc chuyen ra ngoai public_html."
+else
+	if [[ -f $new_path_wp_config ]]; then
+	echo "wp-config.php da duoc chuyen ra ngoai public_html"
+	else
+	echo "Khong tim thay wp-config.php"
+	fi
+fi
+
+echo
+action_wp_manager

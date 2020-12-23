@@ -1,0 +1,38 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "-------------------------------------------------------------------------"
+echo "Tuy chinh php.ini theo domain"
+echo "-------------------------------------------------------------------------"
+echo ""
+choose_domain
+
+if [ "$domain" = "" ]; then
+    clear
+    echo "Ban chua nhap Domain."
+    echo
+    action_ssl_manager
+fi
+
+if [ "$domain" = "${domain/.}" ]; then
+    clear
+    echo "Domain ban nhap khong dung dinh dang."
+    echo
+    action_ssl_manager
+fi
+
+# kiem tra ton tai
+path="/etc/larvps/user/.$domain.conf"
+if [[ ! -f "$path" ]]; then
+    clear
+    echo "Domain khong ton tai tren VPS."
+    echo
+    action_ssl_manager
+fi
+
+echo "Huon dan:"
+echo "- Ctrl + O chon Y: De luu lai cau hinh thay doi."
+echo "- Khoi dong lai php-fpm sau khi thay doi: larvps php -r"
+echo "- Dang chuan bi mo..."
+sleep 5
+nano /etc/php-fpm.d/${domain}.conf

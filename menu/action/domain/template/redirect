@@ -1,0 +1,55 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+domain=$1
+domain_redirect=$2
+username=${domain//[-._]/}
+
+read -p "Ban co muon cai dat SSL (Let's Encrypt) ?  
+Yeu cau: Domain da tro IP ve VPS. (y/n): " confirm_ssl
+echo
+
+# Tạo user và đổi pass
+useradd $username
+
+
+#config nginx
+cat > "/etc/nginx/conf.d/$domain.conf" <<END
+server {
+    listen 80;
+    server_name www.$domain;
+    return \$scheme://$domain\$request_uri;
+}
+
+server {
+    listen 80;
+    server_name $domain;
+    charset utf-8;
+    return 301 \$scheme://$domain_redirect\$request_uri;
+}
+END
+
+# lưu config user
+cat > "/etc/larvps/user/.$domain.conf" <<END
+[$domain]
+username=$username
+domain=$domain
+domain_redirect=$domain_redirect
+type=redirect
+END
+
+#cai dat ssl
+if [ "$confirm_ssl" = "y" ]; then
+. /etc/larvps/menu/action/lets_encrypt/create $domain
+fi
+
+clear
+echo
+echo "Cam on ban da su dung LarVPS"
+echo "Ban da them domain thanh cong. Hay luu lai thong tin de su dung ve sau"
+echo "-------------------------------------------------------------------------"
+echo "1.  Domain                : $domain"
+echo "2.  Redirect              : $domain_redirect"
+echo "-------------------------------------------------------------------------"
+echo
+action_domain

@@ -1,0 +1,33 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "2. Quan ly Let's Encrypt > Danh sach"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#item-6-7"
+echo "/-----------------------------------------------------------------------/"
+echo
+
+if [ "$(ls -At /etc/larvps/lets_encrypt)" ]; then
+	echo "Danh sach Domain:"
+	echo
+	i=1
+	for entry in `ls -A /etc/larvps/lets_encrypt`; do
+	    domain=$( echo $entry | sed 's/.conf//')
+	    if [[ "$domain" != "${domain/.}" ]]; then
+	        echo "$i) $domain"
+	        i=$((i+1));
+	    fi
+	done
+	echo
+	sleep 2
+	action_lets_encrypt
+echo "-------------------------------------------------------------------------"
+	echo "Tong Domain: $((i-1))"
+else
+	clear
+	echo "Khong co domain ton tai."
+	action_lets_encrypt
+fi
+echo

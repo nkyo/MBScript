@@ -1,0 +1,200 @@
+#!/bin/bash
+domain=$1
+username=$2
+port_listen=$3
+
+cat > "/etc/nginx/conf.d/$domain.conf" <<END
+server {
+    listen 80;
+    server_name www.$domain;
+    return \$scheme://$domain\$request_uri;
+
+    listen 443 ssl http2;
+    ssl_certificate /etc/letsencrypt/live/${domain}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${domain}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+}
+
+server {
+    listen 443 ssl http2;
+    ssl_certificate /etc/letsencrypt/live/${domain}/fullchain.pem;
+    ssl_certificate_key /etc/letsencrypt/live/${domain}/privkey.pem;
+    include /etc/letsencrypt/options-ssl-nginx.conf;
+    ssl_dhparam /etc/letsencrypt/ssl-dhparams.pem;
+
+    server_name ${domain} *.${domain};
+    charset utf-8;
+
+    #access_log off;
+    #access_log /home/$username/$domain/logs/access.log;
+    #error_log off;
+    error_log /home/$username/$domain/logs/error.log;
+    root /home/$username/$domain/public_html;
+    index index.php index.html index.htm;
+    
+    # Custom configuration
+    include /home/$username/$domain/public_html/*.conf;
+    include /etc/larvps/custom_nginx/*.conf;
+
+    rewrite ^/sitemap_index.xml\$ /index.php?sitemap=1 last;
+    rewrite ^/([^/]+?)-sitemap([0-9]+)?.xml\$ /index.php?sitemap=\$1&sitemap_n=\$2 last;
+
+    #add_header X-Frame-Options SAMEORIGIN;
+    add_header X-XSS-Protection "1; mode=block";
+    add_header X-Content-Type-Options nosniff;
+    add_header X-Download-Options noopen;
+    add_header X-Powered-By LarVPS;
+    add_header Strict-Transport-Security "max-age=63072000; includeSubDomains; preload" always;
+
+    autoindex off;
+
+    location / {
+        try_files \$uri \$uri/ /index.php?\$query_string;
+    }
+
+    location ~ \.php$ {
+        try_files \$uri \$uri/ /index.php\$is_args\$args;
+        fastcgi_intercept_errors on;
+        fastcgi_index  index.php;
+        include        fastcgi_params;
+        fastcgi_connect_timeout 300;
+        fastcgi_send_timeout 300;
+        fastcgi_read_timeout 300;
+        fastcgi_buffer_size 32k;
+        fastcgi_buffers 8 16k;
+        fastcgi_busy_buffers_size 32k;
+        fastcgi_temp_file_write_size 32k;
+        fastcgi_param  SCRIPT_FILENAME  \$document_root\$fastcgi_script_name;
+        fastcgi_split_path_info ^(.+\.php)(/.+)$;
+        fastcgi_pass  127.0.0.1:$port_listen;
+    }
+
+    location ~* \.(jpg|jpeg|gif|png|css|js|ico|xml|svg|woff2|woff)$ {
+        access_log        off;
+        log_not_found     off;
+        expires           365d;
+    }
+
+    location ~* \.(txt|js|css)$ {
+        access_log off;
+        expires 365d;
+        log_not_found off;
+        break;
+    }
+
+    location = /favicon.ico {
+      access_log     off;
+      log_not_found  off;
+    }
+
+    location = /robots.txt {
+      access_log     off;
+      log_not_found  off;
+    }
+
+    location ~ /\. {
+        access_log off;
+        log_not_found off; 
+        deny all;
+    }
+    
+    location ~ \.htaccess {
+        deny all;
+    }
+
+    location ~ /\.(?!well-known).* {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    location = /wp-config.php {
+        deny all;
+        return 444;
+    }
+
+    # location = /xmlrpc.php {
+    #     deny all;
+    #     access_log off;
+    #     log_not_found off;
+    #     return 444;
+    # }
+
+    location ~* /(?:uploads|files|wp-content|wp-includes|akismet)/.*.php\$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+        return 444;
+    }
+
+    location ~* /wp-includes/.*.php$ {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    location ~ /\.(svn|git)/* {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    location ~ /\.ht {
+        deny all;
+        access_log off;
+        log_not_found off;
+    }
+
+    location ~ /\.user.ini { 
+        deny all; 
+        access_log off;
+        log_not_found off;
+    }
+
+    location ~* /(\.|wp-config\.php|wp-config\.txt|changelog\.txt|readme\.txt|readme\.html|license\.txt) { 
+        deny all; 
+    }
+
+    location ~* \.(pl|cgi|py|sh|lua)$ {
+        return 444;
+    }
+    
+    location ~* (w00tw00t) {
+        return 444;
+    }
+
+    location ~ /\.(gif|png|jpe?g)$ {
+         valid_referers none blocked $domain *.$domain;
+         if (\$invalid_referer) {
+            return   403;
+        }
+    }
+
+    location ~* ^/wp-content/uploads/.*.(html|htm|shtml|php|js|swf|css)$ {
+        deny all;
+    }
+}
+
+server {
+    if (\$host = ${domain}.site) {
+        return 301 https://$host\$request_uri;
+    }
+    listen 80;
+    server_name ${domain}.site;
+    return 404;
+
+}
+
+server {
+    if (\$host = www.${domain}.site) {
+        return 301 https://\$host\$request_uri;
+    }
+
+    listen 80;
+    server_name www.${domain}.site;
+    return 404;
+}
+
+END

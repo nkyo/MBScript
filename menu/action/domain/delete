@@ -1,0 +1,96 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "1. Quan ly Domain > Xoa domain"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#item-5-6"
+echo "/-----------------------------------------------------------------------/"
+echo
+
+domain=$1
+if [ -z "$domain" ]; then
+    get_choose_domain
+fi
+
+if [ "$domain" = '' ]; then
+    clear
+    echo "Ban chua chon Domain."
+    action_domain
+fi
+
+if [ "$domain" = "${domain/.}" ]; then
+    clear
+    echo "Domain ban chon khong dung dinh dang."
+    action_domain
+fi
+
+# kiem tra ton tai
+path="/etc/larvps/user/.$domain.conf"
+if [[ ! -f "$path" ]]; then
+    clear
+    echo "Domain khong ton tai tren VPS."
+    echo
+    action_domain
+fi
+
+read -p "Xac nhan xoa $domain? (y/n): " confirm
+
+if [ "$confirm" = "y" ]; then
+
+        # xoa db
+        if [ -f /etc/larvps/user/.$domain.conf ]; then
+            db_name=$(cat /etc/larvps/user/.$domain.conf | grep db_name | cut -f2 -d'=');
+            db_user=$(cat /etc/larvps/user/.$domain.conf | grep db_user | cut -f2 -d'=');
+
+            if [[ "$db_name" != "" ]]; then
+                read -p "Ban co muon xoa database $db_name? (y/n): " confirm_db_del
+
+                if [[ "$confirm_db_del" = "y" ]]; then
+                    mysql -u admin -p"$db_admin_password" -e "REVOKE ALL PRIVILEGES, GRANT OPTION FROM '$db_user'@'localhost'"
+                    mysql -u admin -p"$db_admin_password" -e "DROP USER IF EXISTS '$db_user'@'localhost'"
+                    mysql -u admin -p"$db_admin_password" -e "DROP DATABASE IF EXISTS $db_name"
+
+                    echo "Da xoa database"
+                    sleep 1
+                fi
+            fi
+        fi
+
+echo "Dang tien hanh xoa $domain ra khoi VPS"
+sleep 1
+
+username=${domain//[-._]/}
+userdel -f -r $username
+htpasswd -D /usr/share/nginx/larvps/passwd/.htpasswd $username
+
+
+# Check - if alias
+domain_alias=$(cat /etc/larvps/user/.$domain.conf | grep "domain_alias" | cut -f2 -d'=')
+if [[ "$domain_alias" ]]; then
+sed -i "s/ ${domain}//g" /etc/nginx/conf.d/${domain_alias}.conf
+fi
+
+rm -f /etc/nginx/conf.d/$domain.conf
+rm -f /etc/nginx/conf.d/${domain}_ssl.bk
+rm -f /etc/nginx/conf.d/${domain_non}_ssl.bk
+
+rm -f /etc/php-fpm.d/$domain.conf
+rm -rf /home/$username
+rm -f /etc/larvps/user/.$domain.conf
+
+
+restart_nginx
+restart_php
+
+chown nginx:nginx /var/lib/php/session
+chmod 755 /var/lib/php/session
+
+clear
+echo "Ban da xoa domain thanh cong."
+sleep 3
+action_domain
+else
+    action_domain
+fi

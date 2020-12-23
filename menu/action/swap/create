@@ -1,0 +1,33 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "14. Quan ly Swap > Them Swap"
+echo "/-----------------------------------------------------------------------/"
+echo ""
+read -p "Nhap GB swap ban muon them: (ex: 1) " swap
+read -p "Xac nhan them $swap GB? (y/n): " confirm
+
+if [[ "$confirm" = 'y' ]]; then
+	
+	swapoff -a -v
+	rm -rf /var/swap.1
+	echo "Dang tien hanh them $swap GB swap..."
+	sleep 1
+/bin/dd if=/dev/zero of=/var/swap.1 bs=1M count=$(( $swap * 1024 ))
+/sbin/mkswap /var/swap.1
+/sbin/swapon /var/swap.1
+
+sed -i '/swap.1/d' /etc/fstab
+echo /var/swap.1 none swap defaults 0 0 >> /etc/fstab
+    clear
+	echo "Da them $swap GB swap thanh cong."
+	sleep 3
+    action_swap
+
+else
+	clear
+	action_swap
+fi
+

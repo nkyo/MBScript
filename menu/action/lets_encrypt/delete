@@ -1,0 +1,33 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "2. Quan ly Let's Encrypt - Xoa SSL - Let's Encrypt"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#item-6-9"
+echo "/-----------------------------------------------------------------------/"
+echo
+
+domain=$1
+if [ -z "$domain" ] ; then
+get_choose_domain
+fi
+
+if [[ ! -f /etc/larvps/lets_encrypt/${domain}.conf ]]; then
+echo "Domain chua cai SSL."
+clear
+action_lets_encrypt
+fi
+
+mv -f /etc/larvps/lets_encrypt/${domain}.conf /etc/nginx/conf.d/${domain}.conf
+
+restart_nginx
+
+sleep 2
+clear
+echo "Da xoa Let's Encrypt cho domain $domain"
+
+
+
+action_lets_encrypt

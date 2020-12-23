@@ -1,0 +1,14 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+
+if [[ "$nginx" != "active" ]]; then
+    clear
+    echo "Nginx hien tai khong hoat dong. Vui long kiem tra lai."
+    echo
+    action_lets_encrypt
+fi
+
+PATH=/sbin:/bin:/usr/sbin:/usr/bin
+# kill $(ps aux | grep 'certbot' | awk '{print $2}')
+certbot renew --nginx

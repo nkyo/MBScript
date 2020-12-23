@@ -1,0 +1,11 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "--//---------------------------------------------------------------------"
+echo "16. Quan ly Disk > Tim file lon"
+echo "/-----------------------------------------------------------------------/"
+echo ""
+echo "10 file lon nhat:"
+find / -not -path "/proc/*" -type f -exec du -Sh {} + | sort -rh | head -n 10
+sleep 3
+action_disk_manager

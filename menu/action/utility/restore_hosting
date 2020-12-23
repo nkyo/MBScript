@@ -1,0 +1,57 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+. /etc/larvps/menu/active_check
+
+clear
+domain=$1
+db_name=$2
+db_user=$3
+db_password=$4
+
+# echo $domain
+# echo 
+# echo $db_name
+# echo 
+# echo $db_user
+# echo 
+# echo $db_password
+
+
+. /etc/larvps/menu/action/utility/restore_template $domain $db_name $db_user $db_password
+
+url_backup=$domain/backup.zip
+rm -rf /home/${username}/${domain}/restore/*
+rm -rf /home/${username}/${domain}/public_html/*
+
+cd /home/$username/$domain/restore
+wget $url_backup
+unzip backup.zip
+# rm -f backup.zip
+mv /home/${username}/${domain}/restore/*/* /home/${username}/${domain}/public_html/
+
+db_url=/home/${username}/${domain}/public_html/database.sql
+mysql -h localhost -u $db_user -p"$db_password" $db_name < $db_url
+
+rm -f $db_url
+rm -rf /home/${username}/${domain}/public_html/backup/*
+rm -rf /home/${username}/${domain}/restore/*
+
+if [[ -f /home/$username/$domain/public_html/wp-config.php ]]; then
+sed -i "/DB_HOST/s/'[^']*'/'localhost'/2" /home/$username/$domain/public_html/wp-config.php
+sed -i "/DB_NAME/s/'[^']*'/'$db_name'/2" /home/$username/$domain/public_html/wp-config.php
+sed -i "/DB_USER/s/'[^']*'/'$db_user'/2" /home/$username/$domain/public_html/wp-config.php
+sed -i "/DB_PASSWORD/s/'[^']*'/'$db_password'/2" /home/$username/$domain/public_html/wp-config.php
+fi
+
+# set config user
+sed -i "/db_name/d" /etc/larvps/user/.$domain.conf
+sed -i "/db_user/d" /etc/larvps/user/.$domain.conf
+sed -i "/db_password/d" /etc/larvps/user/.$domain.conf
+echo "db_name=$db_name" >> /etc/larvps/user/.$domain.conf
+echo "db_user=$db_user" >> /etc/larvps/user/.$domain.conf
+echo "db_password=$db_password" >> /etc/larvps/user/.$domain.conf
+
+chown -R $username:$username /home/$username/$domain/public_html
+chmod -R a=r,u+w,a+X /home/$username/$domain/public_html
+

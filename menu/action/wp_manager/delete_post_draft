@@ -1,0 +1,21 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "18. Quan ly Wordpress > Delete draft posts, trash, revisions"
+echo "/-----------------------------------------------------------------------/"
+echo
+
+
+get_choose_domain
+
+echo
+echo "Dang tien hanh xoa post (draft, trash, revisions) $domain"
+wp post delete $(wp post list --post_status=draft --format=ids --path=$path --allow-root) --path=$path --allow-root
+wp post delete $(wp post list --post_status=trash --format=ids --path=$path --allow-root) --path=$path --allow-root
+wp post delete $(wp post list --post_type='revision' --format=ids --path=$path --allow-root) --path=$path --allow-root
+wp cache flush --path=$path --allow-root
+wp rewrite flush --path=$path --allow-root
+echo
+action_wp_manager

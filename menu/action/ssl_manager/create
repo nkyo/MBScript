@@ -1,0 +1,119 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "21. Thiep lap SSL Paid > Them SSL cho domain"
+echo "/-----------------------------------------------------------------------/"
+echo
+
+nginx="$(systemctl status nginx.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+
+if [[ "$nginx" != "active" ]]; then
+    clear
+    echo "Nginx hien tai khong hoat dong. Vui long kiem tra lai."
+    echo
+    action_ssl_manager
+fi
+
+choose_domain
+
+if [ "$domain" = "" ]; then
+    clear
+    echo "Ban chua nhap Domain."
+    echo
+    action_ssl_manager
+fi
+
+if [ "$domain" = "${domain/.}" ]; then
+    clear
+    echo "Domain ban nhap khong dung dinh dang."
+    echo
+    action_ssl_manager
+fi
+
+# kiem tra ton tai
+path="/etc/larvps/user/.$domain.conf"
+if [[ ! -f "$path" ]]; then
+    clear
+    echo "Domain khong ton tai tren VPS."
+    echo
+    action_ssl_manager
+fi
+username=${domain//[-._]/}
+
+
+if [[ -f /etc/larvps/lets_encrypt/${domain}.conf ]]; then
+clear
+echo "Domain da cau hinh SSL Let's Encrypt. Vui long xoa sau do su dung SSL Paid"
+sleep 2
+action_ssl_manager
+fi
+
+if [[ -f /home/$username/$domain/ssl/$domain.conf ]]; then
+    clear
+    echo "Domain da duoc cau hinh SSL Paid truoc do."
+    action_ssl_manager
+fi
+
+#dhparam
+if [[ ! -f /etc/ssl/certs/dhparam.pem ]]; then
+echo "Dang them dhparam, vui long doi, viec nay ton kha nhieu thoi gian, va chi lam 1 lan duy nhat."
+openssl dhparam -out /etc/ssl/certs/dhparam.pem 4096
+echo "hoan thanh"
+fi
+
+# lưu config nginx
+
+if [[ ! -f /etc/nginx/conf.d/${domain}_bk ]]; then
+cp "/etc/nginx/conf.d/$domain.conf" "/etc/nginx/conf.d/${domain}_bk"
+fi
+
+#ssl
+mkdir -p /home/$username/$domain/ssl
+
+cat > "/home/$username/$domain/ssl/$domain.conf" <<END
+ssl_certificate /home/$username/$domain/ssl/$domain.crt;
+ssl_certificate_key /home/$username/$domain/ssl/$domain.key;
+ssl_session_cache shared:SSL:1m;
+ssl_session_timeout  10m;
+ssl_ciphers EECDH+AESGCM:EDH+AESGCM;
+ssl_ecdh_curve secp384r1;
+ssl_prefer_server_ciphers on;
+ssl_session_tickets off;
+resolver 8.8.8.8 valid=300s;
+resolver_timeout 5s;
+ssl_dhparam /etc/ssl/certs/dhparam.pem;
+END
+echo
+
+
+# include ssl
+sed -i '1,6d' /etc/nginx/conf.d/$domain.conf
+sed -i 's/listen 80;/listen 443 ssl http2;/g' /etc/nginx/conf.d/$domain.conf
+sed -i "/server_name $domain;/a include /home/$username/$domain/ssl/$domain.conf;" /etc/nginx/conf.d/$domain.conf
+
+cat >> "/etc/nginx/conf.d/$domain.conf" <<END
+server {
+    listen 80;
+    server_name ${domain} www.${domain};
+    return 301 https://${domain}\$request_uri;
+}
+
+server {
+    listen 443 ssl;
+    server_name www.${domain};
+    include /home/$username/$domain/ssl/$domain.conf;
+    return 301 https://${domain}\$request_uri;
+}
+END
+clear
+echo "/-----------------------------------------------------------------------/"
+echo "Da thiet lap cau hinh Nginx. Ban theo huong dan sau:"
+echo "- Upload ${domain}.crt và ${domain}.key cua domain vao thu muc /home/$username/$domain/ssl/"
+echo "- Tien hanh restart nginx: larvps nginx -r"
+echo "/-----------------------------------------------------------------------/"
+
+echo
+sleep 3
+action_ssl_manager

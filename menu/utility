@@ -1,0 +1,40 @@
+#!/bin/bash
+echo
+echo "==//====================================================================="
+echo "11. Quan ly Utility"
+echo "/-----------------------------------------------------------------------/"
+echo
+options=(
+	"Cai dat Composer" 
+	"Config Public Laravel"
+    "Bat/Tat IonCube"
+    "Bat/Tat Iframe"
+	"Chuyen website tu HocVPS/VPSSIM/TinoVPS"
+    "Chuyen website tu Hosting/VPS bang LarVPS"
+)
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [0=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/etc/larvps/menu/action/utility/composer'
+            ;;
+        "${options[1]}")
+            '/etc/larvps/menu/action/utility/laravel_public'
+            ;;
+        "${options[2]}")
+            '/etc/larvps/menu/action/utility/ioncube'
+            ;;
+        "${options[3]}")
+            '/etc/larvps/menu/action/utility/iframe'
+            ;;
+        "${options[4]}")
+            '/etc/larvps/menu/action/utility/transfer_hocvps_vpssim'
+            ;;
+        "${options[5]}")
+            echo "Huong dan: https://larvps.com/articles/huong-dan-backup-and-restore-bang-cong-cu-larvps"
+            ;;
+        *) larvps;;
+    esac
+done

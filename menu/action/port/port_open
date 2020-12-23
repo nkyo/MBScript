@@ -1,0 +1,12 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+
+firewall-cmd --permanent --zone=public --add-port=$port_ssh/tcp
+firewall-cmd --permanent --zone=public --add-port=$port_admin/tcp
+firewall-cmd --permanent --zone=public --add-service=http --add-service=https
+firewall-cmd --add-service=mysql --permanent
+firewall-cmd --reload
+echo "Da mo cac port can thiet cho VPS"
+sleep 1
+larvps

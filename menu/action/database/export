@@ -1,0 +1,30 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "- 6. Quan ly Database > Import Database"
+echo "/-----------------------------------------------------------------------/"
+echo
+
+mkdir -p "/home/db"
+mysql -u admin -p"$db_admin_password" -e "show databases where \`database\` not in('information_schema', 'test', 'sys', 'phpmyadmin', 'mysql', 'performance_schema')"
+
+read -p "Nhap ten Database ban muon export: " database
+
+if [[ "$database" = "" || "$database" = "0" ]]; then
+	action_database
+fi
+
+
+date=$(date +"%Y-%m-%d-%Hh-%Mm")
+file=${date}_${database}.tar.gz
+path="/home/db/$file"
+echo "Dang tien thanh export..."
+mysqldump -u admin -p$db_admin_password --single-transaction --quick --lock-tables=false $database | gzip > "$path"
+sleep 2
+clear
+echo "Hoan thanh."
+echo "File export nam o thu muc:"
+echo "$path"
+action_database

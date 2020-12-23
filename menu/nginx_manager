@@ -1,0 +1,24 @@
+#!/bin/bash
+. /etc/larvps/menu/functions
+echo
+echo "==//====================================================================="
+echo "7. Quan ly Nginx - $(systemctl status nginx.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#section-33"
+echo "/-----------------------------------------------------------------------/"
+echo
+options=("Cau hinh nginx.conf" "Cau hinh domain.conf")
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [0=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/etc/larvps/menu/action/nginx_manager/nginx_conf'
+            ;;
+        "${options[1]}")
+            '/etc/larvps/menu/action/nginx_manager/domain_conf'
+            ;;
+        *) larvps;;
+    esac
+done

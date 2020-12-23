@@ -1,0 +1,25 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo
+echo "==//====================================================================="
+echo "25. Active Key"
+echo "========================================================================="
+echo "Mua Active Key: https://larvps.com/pages/pricing"
+echo "/-----------------------------------------------------------------------/"
+echo
+options=("Kich hoat" "Xem thong tin")
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [0=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/etc/larvps/menu/action/active_key/active'
+            ;;
+        "${options[1]}")
+            '/etc/larvps/menu/action/active_key/info'
+            ;;
+        *) larvps;;
+    esac
+done

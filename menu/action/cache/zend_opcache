@@ -1,0 +1,33 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "--//---------------------------------------------------------------------"
+echo "13. Quan ly Cache > Zend Opacache" 
+echo "-------------------------------------------------------------------------"
+echo "Mac dinh LarVPS luon bat Zen Opache de dam bao he thong hoat dong on dinh."
+echo "/-----------------------------------------------------------------------/"
+echo
+options=("Cau hinh Zend Opcache" "Zend Opcache blacklist")
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [0=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            echo "Huong Dan:"
+            echo "Ctrl + O chọn Y: De luu lai thay doi cau hinh."
+            echo "Dang tien hanh mo cau hinh Zend Opcache..."
+            sleep 5
+            nano /etc/php.d/10-opcache.ini
+            ;;
+        "${options[1]}")
+            echo "Huong Dan:"
+            echo "Ctrl + O chọn Y: De luu lai thay doi cau hinh."
+            echo "Dang tien hanh mo Blacklist..."
+            sleep 5
+            nano /etc/php.d/opcache-default.blacklist
+            ;;
+        *) action_cache;;
+    esac
+done

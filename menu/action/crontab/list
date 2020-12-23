@@ -1,0 +1,19 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "-------------------------------------------------------------------------"
+echo "Danh sách Crontab"
+echo "-------------------------------------------------------------------------"
+echo 
+if [ "$(crontab -l)" ]; then
+	clear
+	echo "Danh sách Crontab của bạn:"
+	echo
+	crontab -l
+	echo "-------------------------------------------------------------------------"
+	echo
+	action_crontab
+else
+	echo "Không có CronJob nào tồn tại trên hệ thống"
+	action_crontab
+fi

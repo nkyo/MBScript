@@ -1,0 +1,7 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "--//---------------------------------------------------------------------"
+echo "16. Quan ly Disk > Gioi han Disk Domain"
+echo "/-----------------------------------------------------------------------/"
+echo ""

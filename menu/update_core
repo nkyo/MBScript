@@ -1,0 +1,331 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+chmod 700 /var/lib/php/session
+# dnf update --security
+
+#0.4.9
+if [[ "$version" < "0.4.9" ]]; then
+    if [ "$(ls -A /etc/nginx/conf.d/)" ]; then
+    for entry in `ls -A /etc/nginx/conf.d`; do
+        sed -i 's/fastcgi_hide_header Set-Cookie;//' /etc/nginx/conf.d/$entry
+        larvps nginx -r
+    done
+    fi
+fi
+
+#0.4.9.3
+if [[ "$version" < "0.4.9.3.1" ]]; then
+echo "alias 01='. /etc/larvps/menu/action/larvps_update/update_larvps'" >> /root/.bashrc
+fi
+
+#0.5
+if [[ "$version" < "0.5.1" ]]; then
+cat <(crontab -l) <(echo "0 * * * * /etc/larvps/cron/backup/hourly >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 */6 * * * /etc/larvps/cron/backup/quarter_daily >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 */12 * * * /etc/larvps/cron/backup/half_daily >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 0 * * * /etc/larvps/cron/backup/daily >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 0 * * 0 /etc/larvps/cron/backup/weekly >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 0 1 * * /etc/larvps/cron/backup/monthly >> /dev/null 2>&1") | crontab -
+service crond restart
+fi
+
+
+#rclone
+if [[ ! -f "/usr/bin/rclone" ]]; then
+curl https://rclone.org/install.sh | sudo bash
+fi
+
+
+#tạo folder
+if [[ ! -d "/etc/larvps/cron/backup" ]]; then
+mkdir -p /etc/larvps/cron/backup
+chmod u+x /etc/larvps/cron/backup/hourly>>/etc/larvps/cron/backup/hourly
+chmod u+x /etc/larvps/cron/backup/quarter_daily>>/etc/larvps/cron/backup/quarter_daily
+chmod u+x /etc/larvps/cron/backup/half_daily>>/etc/larvps/cron/backup/half_daily
+chmod u+x /etc/larvps/cron/backup/daily>>/etc/larvps/cron/backup/daily
+chmod u+x /etc/larvps/cron/backup/weekly>>/etc/larvps/cron/backup/weekly
+chmod u+x /etc/larvps/cron/backup/monthly>>/etc/larvps/cron/backup/monthly
+fi
+
+
+if [[ "$version" < "0.5.3.8" ]]; then
+    if [ "$(ls -A /etc/php-fpm.d/)" ]; then
+        for entry in `ls -A /etc/nginx/conf.d`; do
+            if [[ "$entry" != "default.conf" ]] && [[ "$entry" != "www.conf" ]]; then
+               domain=$( echo $entry | sed 's/.conf//')
+               username=${domain//[-._]/}
+               sed -i '/open_basedir/d' /etc/php-fpm.d/$entry
+            fi
+        done
+    larvps php -r
+    fi
+    rm -f /etc/larvps/custom_nginx/fastcgi_cache.conf
+    larvps nginx -r
+fi
+
+
+if [[ ! -d "/usr/share/nginx/larvps/opcache" ]]; then
+#opcache
+cd /usr/share/nginx/larvps
+curl -sO "https://larvps.com/scripts/configs/tool/opcache-gui-master.zip"
+unzip /usr/share/nginx/larvps/opcache-gui-master.zip
+rm -f /usr/share/nginx/larvps/opcache-gui-master.zip
+mv /usr/share/nginx/larvps/opcache-gui-master /usr/share/nginx/larvps/opcache
+fi
+
+if [[ ! -d "/usr/share/nginx/larvps/phpmemcachedadmin" ]]; then
+#phpmemcachedadmin
+cd /usr/share/nginx/larvps
+curl -sO "https://larvps.com/scripts/configs/tool/phpmemcachedadmin-master.zip"
+unzip /usr/share/nginx/larvps/phpmemcachedadmin-master.zip
+rm -f /usr/share/nginx/larvps/phpmemcachedadmin-master.zip
+mv /usr/share/nginx/larvps/phpmemcachedadmin-master /usr/share/nginx/larvps/phpmemcachedadmin
+chmod 777 /usr/share/nginx/larvps/phpmemcachedadmin/Temp
+fi
+
+
+if [[ "$version" < "0.5.4.9.8"  ]]; then
+sed -i "s/admin_password=/ad_password=/g" /etc/larvps/.larvps.conf
+sed -i "s/db_ad_password=/db_admin_password=/g" /etc/larvps/.larvps.conf
+fi
+
+if [[ "$version" < "0.5.5.6.2"  ]]; then
+dnf -y install memcached php-pecl-memcached php-pecl-memcache
+fi
+
+if [[ ! -f "/usr/local/bin/wp" ]]; then
+curl -O https://raw.githubusercontent.com/wp-cli/builds/gh-pages/phar/wp-cli.phar
+php wp-cli.phar --info
+chmod +x wp-cli.phar
+mv wp-cli.phar /usr/local/bin/wp
+fi
+
+if [[ ! -f "/etc/nginx/rocket-nginx/default.conf" ]]; then
+cd /etc/nginx
+git clone https://github.com/satellitewp/rocket-nginx.git
+cd rocket-nginx
+cp rocket-nginx.ini.disabled rocket-nginx.ini
+php rocket-parser.php
+fi
+
+if [[ ! -f "/etc/larvps/nginx/global.conf" ]]; then
+mkdir -p /etc/larvps/nginx
+touch /etc/larvps/nginx/global.conf
+
+# cat > "/etc/larvps/nginx/global.conf" <<END
+# map \$http_accept \$webp_suffix {
+#   default "";
+#   "~*webp" ".webp";
+# }
+# END
+
+sed -i "s/custom_nginx/nginx/g" /etc/nginx/nginx.conf
+nginx -t && service nginx reload
+fi
+
+if [[ "$version" < "0.5.6.8" ]]; then
+chown nginx:nginx /var/lib/phpmyadmin/tmp
+fi
+
+if [[ "$version" < "0.5.6.9.7" ]]; then
+sed -i "/root:x/d" /etc/passwd
+echo "root:x:0:0:root:/root:/bin/bash" >> /etc/passwd
+fi
+
+
+if [[ ! -d '/etc/larvps/cron/alert' ]]; then
+mkdir -p /etc/larvps/cron/alert
+
+chmod u+x /etc/larvps/cron/alert/minute>>/etc/larvps/cron/alert/minute
+chmod u+x /etc/larvps/cron/alert/five_minutes>>/etc/larvps/cron/alert/five_minutes
+chmod u+x /etc/larvps/cron/alert/ten_minutes>>/etc/larvps/cron/alert/ten_minutes
+chmod u+x /etc/larvps/cron/alert/half_hourly>>/etc/larvps/cron/alert/half_hourly
+chmod u+x /etc/larvps/cron/alert/hourly>>/etc/larvps/cron/alert/hourly
+chmod u+x /etc/larvps/cron/alert/daily>>/etc/larvps/cron/alert/daily
+chmod u+x /etc/larvps/cron/alert/weekly>>/etc/larvps/cron/alert/weekly
+chmod u+x /etc/larvps/cron/alert/monthly>>/etc/larvps/cron/alert/monthly
+
+cat <(crontab -l) <(echo "* * * * * /etc/larvps/cron/alert/minute >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "*/5 * * * * /etc/larvps/cron/alert/five_minutes >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "*/10 * * * * /etc/larvps/cron/alert/ten_minutes >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "*/30 * * * * /etc/larvps/cron/alert/half_hourly >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 * * * * /etc/larvps/cron/alert/hourly >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 8 * * * /etc/larvps/cron/alert/daily >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 8 * * 0 /etc/larvps/cron/alert/weekly >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 8 1 * * /etc/larvps/cron/alert/monthly >> /dev/null 2>&1") | crontab -
+service crond restart
+fi
+
+if [[ "$version" < "0.5.7.2.2" ]]; then
+
+if [[ "$alert_login_2fa" = "1" ]]; then
+sed -i "/root:x/d" /etc/passwd
+echo "root:x:0:0:root:/root:/etc/larvps/.login_2fa" >> /etc/passwd
+fi
+
+fi
+
+
+if [[ "$version" < "0.5.7.3.3" ]]; then
+cd
+wget https://downloads.ioncube.com/loader_downloads/ioncube_loaders_lin_x86-64.tar.gz
+tar xzf ioncube_loaders_lin_x86-64.tar.gz
+mv ioncube /usr/local/
+rm -f ioncube_loaders_lin_x86-64.tar.gz
+sed -i "/ioncube/d" /etc/php.d/00-larvps-custom.ini
+echo "" >> /etc/php.d/00-larvps-custom.ini
+echo "zend_extension = /usr/local/ioncube/ioncube_loader_lin_7.4.so" >> /etc/php.d/00-larvps-custom.ini
+service php-fpm restart
+fi
+
+
+if [[ "$version" < "0.5.7.6.3" ]]; then
+crontab -r
+cat <(crontab -l) <(echo "0 3 * * * /usr/local/bin/certbot-auto renew") | crontab -
+cat <(crontab -l) <(echo "0 * * * * /etc/larvps/cron/backup/hourly >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 */6 * * * /etc/larvps/cron/backup/quarter_daily >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 */12 * * * /etc/larvps/cron/backup/half_daily >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 3 * * * /etc/larvps/cron/backup/daily >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 3 * * 0 /etc/larvps/cron/backup/weekly >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 3 1 * * /etc/larvps/cron/backup/monthly >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "* * * * * /etc/larvps/cron/alert/minute >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "*/5 * * * * /etc/larvps/cron/alert/five_minutes >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "*/10 * * * * /etc/larvps/cron/alert/ten_minutes >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "*/30 * * * * /etc/larvps/cron/alert/half_hourly >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 * * * * /etc/larvps/cron/alert/hourly >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 8 * * * /etc/larvps/cron/alert/daily >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 8 * * 0 /etc/larvps/cron/alert/weekly >> /dev/null 2>&1") | crontab -
+cat <(crontab -l) <(echo "0 8 1 * * /etc/larvps/cron/alert/monthly >> /dev/null 2>&1") | crontab -
+service crond restart
+fi
+
+if [[ "$version" < "0.5.7.8.1.5" ]]; then
+sed -i "/moniter/d" /etc/larvps/cron/alert/five_minutes
+fi
+
+
+if [[ "$version" < "0.5.8.1" ]]; then
+
+if [ "$(ls -A /etc/php-fpm.d/)" ]; then
+    for entry in `ls -A /etc/php-fpm.d/`; do
+       sed -i '/disable_functions/d' /etc/php-fpm.d/$entry
+    done
+    larvps php -r
+fi
+
+fi
+
+
+if [[ "$version" < "0.5.8.9" ]]; then
+if [[ -f "/var/swap.1" ]]; then
+sed -i '/swap.1/d' /etc/fstab
+echo /var/swap.1 none swap defaults 0 0 >> /etc/fstab
+fi
+fi
+
+
+if [[ "$version" < "0.6.1" ]]; then
+for entry in `ls -A /etc/php-fpm.d/`; do
+  sed -i "s/dynamic/ondemand/g" /etc/php-fpm.d/$entry
+done
+larvps php -r
+fi
+
+if [[ "$version" < "0.6.2" ]]; then
+cat > "/etc/larvps/cron/alert/daily" <<END
+/usr/local/bin/certbot-auto renew
+END
+fi
+
+if [[ "$version" < "0.7" ]]; then
+if [ "$(ls -At /etc/larvps/user)" ]; then
+  i=1
+  for entry in `ls -A /etc/larvps/user`; do
+      domain=$( echo $entry | sed 's/^.//' | sed 's/.conf//')
+      if [ "$domain" != "${domain/.}" ]; then
+        username=${domain//[-._]/}
+        chmod g+s /home/$username/$domain/public_html
+      fi
+  done
+fi
+fi
+
+if [[ "$version" < "0.7.3" ]]; then
+if [ "$(ls -At /etc/larvps/user)" ]; then
+  i=1
+  for entry in `ls -A /etc/larvps/user`; do
+      domain=$( echo $entry | sed 's/^.//' | sed 's/.conf//')
+      if [ "$domain" != "${domain/.}" ]; then
+        sed -i "s/add_header X-Frame/\#add_header X-Frame/g" /etc/nginx/conf.d/$domain.conf
+      fi
+  done
+nginx -t && service nginx reload
+fi
+fi
+
+if [[ "$version" < "0.7.3.5.3" ]]; then
+sed -i "/certbot/d" /etc/larvps/cron/alert/daily
+kill $(ps aux | grep '[n]ginx' | awk '{print $2}'); systemctl restart nginx
+systemctl restart nginx 
+fi
+
+if [[ "$version" < "0.7.3.6" ]]; then
+echo ". /etc/larvps/menu/action/lets_encrypt/renew_ssl" >> /etc/larvps/cron/alert/daily
+fi
+
+if [[ "$version" < "0.7.4.2" ]]; then
+#update phpmyadmin
+phpmyadmin_version=5.0.4
+rm -rf /usr/share/nginx/larvps/phpmyadmin
+cd /usr/share/nginx/larvps
+wget https://files.phpmyadmin.net/phpMyAdmin/$phpmyadmin_version/phpMyAdmin-$phpmyadmin_version-all-languages.zip
+unzip phpMyAdmin-$phpmyadmin_version-all-languages.zip
+mv phpMyAdmin-$phpmyadmin_version-all-languages phpmyadmin
+rm -f phpMyAdmin-$phpmyadmin_version-all-languages.zip
+cp /usr/share/nginx/larvps/phpmyadmin/config.sample.inc.php  /usr/share/nginx/larvps/phpmyadmin/config.inc.php
+secret=$(openssl rand -base64 32)
+echo "\$cfg['TempDir'] = '/var/lib/phpmyadmin/tmp';" >> /usr/share/nginx/larvps/phpmyadmin/config.inc.php
+echo "\$cfg['blowfish_secret'] = '$secret';" >> /usr/share/nginx/larvps/phpmyadmin/config.inc.php
+mkdir -p /var/lib/phpmyadmin/tmp
+chmod 700 /var/lib/phpmyadmin/tmp
+chown nginx:nginx /var/lib/phpmyadmin/tmp
+chown -hR nginx:nginx /usr/share/nginx/larvps/phpmyadmin
+fi
+
+if [[ "$version" < "0.7.5" ]]; then
+sed -i "/centos_security/d" /etc/larvps/cron/alert/daily
+echo ". /etc/larvps/menu/centos_security" >> /etc/larvps/cron/alert/daily
+fi
+
+if [[ "$version" < "0.7.5.3" ]]; then
+mv /usr/local/bin/certbot-auto /usr/bin/certbot
+fi
+
+if [[ "$version" < "0.7.5.9" ]]; then
+for entry in `ls -A /etc/larvps/user`; do
+    domain=$( echo $entry | sed 's/^.//' | sed 's/.conf//')
+    if [ "$domain" != "${domain/.}" ]; then
+      sed -i "s/\.(pl/\\\.\(pl/g" /etc/nginx/conf.d/$domain.conf
+    fi
+done
+nginx -t && service nginx reload
+fi
+
+if [[ "$version" < "0.7.6.6.3" ]]; then
+curl -O https://dl.eff.org/certbot-auto
+chmod a+x certbot-auto
+mv -f certbot-auto /usr/bin/certbot
+cat <(crontab -l) <(echo '0 0,12 * * * /usr/bin/certbot renew --renew-hook "service nginx reload"') | crontab -
+fi
+
+if [[ "$version" < "0.7.6.8.2" ]]; then
+sed -i "s/user = apache/user = nginx/g" /etc/php-fpm.d/www.conf
+sed -i "s/group = apache/group = nginx/g" /etc/php-fpm.d/www.conf
+fi
+
+if [[ "$version" < "0.7.6.8.5" ]]; then
+for entry in `ls -A /etc/php-fpm.d/`; do
+sed -i 's/\/\:\/tmp/\:\/tmp/' /etc/php-fpm.d/$entry
+done
+larvps php -r
+fi

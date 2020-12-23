@@ -1,0 +1,20 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "//---------------------------------------------------------------------//"
+echo "Danh sach user"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#item-8-20"
+echo "/-----------------------------------------------------------------------/"
+echo
+echo "/-----------------------------------------------------------------------/"
+echo "phpMyAdmin: http://$(hostname -I | cut -f1 -d' '):$port_admin/phpmyadmin"
+echo "/-----------------------------------------------------------------------/"
+echo
+list_user=$(cat "/usr/share/nginx/larvps/passwd/.htpasswd" | awk -F ':' '{print $1}')
+i=0
+for entry in $list_user; do
+    count=`expr $count + 1`
+    echo "$count) $entry"
+done
+app_admin

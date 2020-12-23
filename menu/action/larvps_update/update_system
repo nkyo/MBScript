@@ -1,0 +1,17 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+clear
+echo "-------------------------------------------------------------------------"
+echo "Cap nhat he thong"
+echo "-------------------------------------------------------------------------"
+echo ""
+read -p "Xac nhan cap nhat he thong (y/n): " confirm
+if [[ "$confirm" = 'y' ]]; then
+sudo dnf install epel-release -y
+sudo dnf upgrade -y
+    clear
+    echo "Hoan thanh..."
+    action_larvps_update
+fi
+action_larvps_update

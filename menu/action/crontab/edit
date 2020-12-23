@@ -1,0 +1,8 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "-------------------------------------------------------------------------"
+echo "Thêm Crontab"
+echo "-------------------------------------------------------------------------"
+export VISUAL=nano; crontab -e
+

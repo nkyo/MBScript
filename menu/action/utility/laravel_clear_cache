@@ -1,0 +1,8 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "--//---------------------------------------------------------------------"
+echo "11. Quan ly Utility > Laravel clear cache"
+echo "/-----------------------------------------------------------------------/"
+echo "sap ra mat"
+action_utility

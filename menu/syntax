@@ -1,0 +1,280 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+
+if [ "$EUID" -ne 0 ]; then 
+  echo "Dang chuyen sang Root"
+  sudo -i
+  sleep 3
+fi
+
+one=$( [ "$1" != "" ] && echo $1 || echo "" )
+two=$( [ "$2" != "" ] && echo $2 || echo "" )
+three=$( [ "$3" != "" ] && echo $3 || echo "" )
+four=$( [ "$4" != "" ] && echo $4 || echo "" )
+five=$( [ "$5" != "" ] && echo $5 || echo "" )
+six=$( [ "$6" != "" ] && echo $6 || echo "" )
+
+move_me() {
+    cd $1
+}
+
+if [ "$one" = "-i" ] || [ "$one" = "info" ]; then
+   "/etc/larvps/menu/info"
+   exit 1
+fi
+
+if [ "$one" = "-pa" ]; then
+echo "Port Admin: $port_admin"
+echo "http://$ip:$port_admin/phpmyadmin"
+exit 1
+fi
+
+if [ "$one" = "-sv" ]; then
+echo "Nginx        : $(systemctl status nginx.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "Php-FPM      : $(systemctl status php-fpm.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "MariaDB      : $(systemctl status mariadb.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "SSH          : $(systemctl status sshd.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "Fail2Ban     : $(systemctl status fail2ban.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "Crond        : $(systemctl status crond.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "Memcached    : $(systemctl status memcached.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "Redis        : $(systemctl status redis.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+exit 1
+fi
+
+if [ "$one" = "-po" ]; then
+echo "Port Open    : $(firewall-cmd --list-ports)"
+exit 1
+fi
+
+
+if [ "$one" = "domain" ]; then
+
+    if [ "$two" = "create" ]; then
+       "/etc/larvps/menu/action/domain/create"
+       exit 1
+    fi
+
+   "/etc/larvps/menu/action/domain/list"
+   exit 1
+fi
+
+
+if [ "$one" = "-e" ] || [ "$one" = "error" ]; then
+ journalctl -xe | grep "error:" | sort -r | head -10
+ exit 1
+fi
+
+if [ "$one" = "-l" ]; then
+   journalctl -xe | head -15
+   exit 1
+fi
+
+if [ "$one" = "-lf" ]; then
+   journalctl -xe
+   exit 1
+fi
+
+if [ "$one" = "chmod" ]; then
+
+  if [ "$two" != "" ] ; then
+    domain=$two
+    username=${two//[-._]/}
+    path="/home/$username/$domain"
+    if [[ -d "$path" ]]; then
+        chown -hR $username:$username /home/$username/$domain/public_html
+        chmod -R a=r,u+w,a+X /home/$username/$domain/public_html
+        chown nginx:nginx /var/lib/php/session
+        chmod 755 /var/lib/php/session
+
+        if [[ -f /home/$username/$domain/public_html/wp-config.php ]]; then
+            chmod 400 /home/$username/$domain/public_html/wp-config.php
+        fi
+        if [[ -f /home/$username/$domain/public_html/index.php ]]; then
+            chmod 444 /home/$username/$domain/public_html/index.php
+        fi
+        if [[ -f /home/$username/$domain/public_html/public/index.php ]]; then
+            chmod 444 /home/$username/$domain/public_html/public/index.php
+        fi
+        
+        echo "Da phan lai quyen cho $domain"
+        exit 1
+    else 
+        echo "Domain khong ton tai trong VPS"
+        exit 1
+    fi
+  fi
+
+fi
+
+if [ "$one" = "nginx" ]; then
+   if [ "$two" = "-r" ] || [ "$two" = "restart" ] ; then
+       systemctl restart nginx.service
+       echo "Da khoi dong lai NGINX"
+   fi
+
+   if [ "$two" = "-l" ] || [ "$two" = "log" ] ; then
+       cat /var/log/nginx/error.log | sort -r | head -15
+   fi
+
+   if [ "$two" = "-ll" ] || [ "$two" = "clear" ] ; then
+       echo " " > /var/log/nginx/error.log
+       echo "Da xoa logs Nginx"
+   fi
+
+   if [ "$two" = "-s" ] || [ "$two" = "status" ] ; then
+       systemctl status nginx.service
+   fi
+
+   exit 1
+fi
+
+if [ "$one" = "php" ]; then
+   if [ "$two" = "-r" ] ||  [ "$two" = "restart" ]; then
+       systemctl restart php-fpm.service
+       echo "Da khoi dong lai PHP-FPM"
+   fi
+
+   if [ "$two" = "-l" ] || [ "$two" = "log" ] ; then
+       cat /var/log/php-fpm/error.log | sort -r | head -15
+   fi
+
+   if [ "$two" = "-ll" ] || [ "$two" = "clear" ] ; then
+       echo " " > /var/log/php-fpm/error.log
+       echo "Da xoa logs php-fpm"
+   fi
+
+   if [ "$two" = "-s" ] || [ "$two" = "status" ] ; then
+       systemctl status php-fpm.service
+   fi
+
+   exit 1
+fi
+
+if [ "$one" = "mysql" ]; then
+   if [ "$two" = "-r" ] || [ "$two" = "restart" ]; then
+    systemctl restart mysql.service
+    echo "Da khoi dong lai MYSQL"
+   fi
+
+   if [ "$two" = "-l" ] || [ "$two" = "log" ] ; then
+       cat /var/log/mysql/mysql.log | sort -r | head -15
+   fi
+
+   if [ "$two" = "-ll" ] || [ "$two" = "clear" ] ; then
+       echo " " > /var/log/mysql/mysql.log
+       echo "Da xoa logs mysql"
+   fi
+
+   if [ "$two" = "-s" ] || [ "$two" = "status" ] ; then
+       systemctl status mysql.service
+   fi
+
+   exit 1
+fi
+
+
+if [ "$one" = "ram" ]; then
+  free -m
+   exit 1
+fi
+
+# if [ "$one" = "go" ]; then
+
+#    if [[ "$two" = 'nginx' ]]; then
+#      cd /etc/nginx/conf.d/
+#      exit 1
+#    fi
+
+#    if [[ "$two" = 'php' ]]; then
+#         cd /etc/php-fpm.d/
+#         exit 1
+#    fi
+
+#    if [[ "$two" = 'php.ini' ]]; then
+#         nano /etc/php.ini
+#         exit 1
+#    fi
+
+#    if [ "$two" ]; then
+#      username=${two//[-._]/}
+#      dir="/home/${username}/${two}/public_html"
+#      if [[ -d "$dir" ]]; then
+
+# cat > "/etc/larvps/menu/cd" <<END
+# #!/bin/bash
+# cd $dir
+# END
+# . /etc/larvps/menu/cd
+#      else
+#        echo "Domain khong ton tai"
+#        exit 1
+#      fi
+#    fi
+# fi
+
+
+if [ "$one" = "-ic" ]; then
+
+    if [[ "$two" ]]; then
+      clear
+      echo '--------------------------------------------------'
+      echo /etc/larvps/user/.$two.conf
+      if [[ -f /etc/larvps/user/.$two.conf ]]; then
+        cat "/etc/larvps/user/.$two.conf"
+      else
+        echo "Domain khong ton tai trong he thong."
+      fi
+      echo '--------------------------------------------------'
+      exit 1
+    fi
+   cat "/etc/larvps/.larvps.conf"
+   exit 1
+fi
+
+
+if [ "$one" = "-v" ]; then
+  . /etc/larvps/.larvps.conf
+   echo "Ban dang su dung LarVPS: v$version"
+   exit 1
+fi
+
+if [ "$one" = "list" ]; then
+   if [ "$(ls -A /etc/larvps/user)" ]; then
+      echo
+      echo "Danh sach list public_html"
+      echo '--------------------------------------------------'
+        for entry in `ls -A /etc/larvps/user`; do
+          domain=$( echo $entry | sed 's/^.//' | sed 's/.conf//')
+          username=${domain//[-._]/}
+          path="/home/$username/$domain/public_html"
+          i=1
+          
+          if [[ -d "$path" ]]; then
+              echo "cd $path"
+          fi
+      
+        done
+
+        echo '--------------------------------------------------'
+        echo
+  fi
+   exit 1
+fi
+
+if [ "$one" = "update" ]; then
+  . /etc/larvps/menu/action/larvps_update/update_larvps
+  echo ""
+  exit 1
+fi
+
+
+if [ "$one" = "update-core" ]; then
+"/etc/larvps/menu/update_core" >> /dev/null 2>&1
+echo "Da cap nhat thay doi core."
+exit 1
+fi
+
+
+if [ "$one" = "restore" ]; then
+. /etc/larvps/menu/action/utility/restore_hosting $two $three $four $five $six
+fi

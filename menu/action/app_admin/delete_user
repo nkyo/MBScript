@@ -1,0 +1,41 @@
+#!/bin/bash
+. /etc/larvps/.larvps.conf
+. /etc/larvps/menu/functions
+echo "//---------------------------------------------------------------------//"
+echo "Xoa user"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#item-8-24"
+echo "/-----------------------------------------------------------------------/"
+echo
+echo "Danh sach user:"
+list_user=$(cat "/usr/share/nginx/larvps/passwd/.htpasswd" | awk -F ':' '{print $1}')
+i=0
+for entry in $list_user; do
+    count=`expr $count + 1`
+    echo "$count) $entry"
+done
+echo
+read -p "Nhap ten user: " username
+
+if [ "$username" = "" ]; then
+    clear
+    app_admin
+fi
+
+if [[ "$username" = "admin" ]]; then
+   echo "Tai khoan admin khong the xoa, vi con phuc vu nhieu tinh nang khac."
+fi
+
+read -p "Xac nhan xoa $username? (y/n): " confirm
+if [[ "$confirm" = "y" ]]; then
+   echo "Dang tien hanh xoa user..."
+   sleep 1
+   htpasswd -D /usr/share/nginx/larvps/passwd/.htpasswd $username
+   clear
+   echo "Da xoa user thanh cong"
+   app_admin
+else
+   clear
+   app_admin
+fi
+
