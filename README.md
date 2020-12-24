@@ -1,5 +1,4 @@
 # MBScript
 VPS Panel via command line.
 
-Sample menu:
-\\SP_HOSTING_5\Users\Namlt\Downloads\menu\menu
+Tất cả sẽ được viết và cài đặt trên Ubuntu. Các phiên bản PHP MARIADB và Apache mới nhất.
