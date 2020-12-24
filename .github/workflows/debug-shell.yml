@@ -28,6 +28,56 @@ jobs:
       # Runs a single command using the runners shell
       - name: Run a one-line script
         run: echo Hello, world!
+        run:#!/bin/bash
+echo
+echo "==//====================================================================="
+echo "1. Quan ly Domain"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: https://larvps.com/pages/documentation/all#section-5"
+echo "/-----------------------------------------------------------------------/"
+echo
+options=(
+    "Danh sach - Domain/SubDomain"
+    "Them - Domain/SubDomain"
+    "Them - Redirect"
+    "Them - Alias"
+    "Phan quyen han (Chown/Chmod)"
+    "Xoa"
+    "Mo/Khoa"
+    "Phuc hoi Nginx"
+    )
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [0=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/etc/larvps/menu/action/domain/list'
+            ;;
+        "${options[1]}")
+            '/etc/larvps/menu/action/domain/create'
+            ;;
+        "${options[2]}")
+            '/etc/larvps/menu/action/domain/redirect'
+            ;;
+        "${options[3]}")
+            '/etc/larvps/menu/action/domain/alias'
+            ;;
+        "${options[4]}")
+            '/etc/larvps/menu/permission'
+            ;;
+        "${options[5]}")
+            '/etc/larvps/menu/action/domain/delete'
+            ;;
+        "${options[6]}")
+            '/etc/larvps/menu/action/domain/suspend'
+            ;;
+        "${options[7]}")
+            '/etc/larvps/menu/action/domain/restore_nginx'
+            ;;
+        *) clear && larvps;;
+    esac
+done
 
       # Runs a set of commands using the runners shell
       - name: Run a multi-line script
