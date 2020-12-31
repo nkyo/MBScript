@@ -7,7 +7,7 @@ if  echo $OUTPUT | grep -q "Ubuntu" ; then
         echo "Dang tien hanh cap nhat cac thu vien Ubuntu va tai goi cai dat MBScript..."
 #---- Bat dau chay lenh keo cai thu vien ve----#        
 apt-get install curl wget -y 1 > /dev/null
-curl --silent -o mbscript.sh "https://linkdown.sh" 2>/dev/null
+curl --silent -o mbscript.sh "https://cloudmonitor.matbao.support/script/mbscript.sh" 2>/dev/null
 chmod +x mbscript.sh
 else
 
