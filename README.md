@@ -4,6 +4,9 @@ VPS Panel via command line.
 Tất cả sẽ được viết và cài đặt trên Ubuntu. Các phiên bản PHP MARIADB và Apache mới nhất.
 <br />
 Server phục vụ việc test script: 103.15.50.222 - root - pass mặc định
+<br />
+Thư mục cài đặt MBscript chính và các script phụ: <br />
+INSTALLDIR='/usr/local/'
 
 Tham khảo thêm 
 https://www.rfxn.com/
