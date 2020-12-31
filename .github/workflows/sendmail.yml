@@ -1,31 +1,16 @@
  name: Send email
-  # You may pin to the exact commit or the version.
-  uses: dawidd6/action-send-mail@8be2ceac54300436b5973d0b389ad6d34c2e2c2d
   uses: dawidd6/action-send-mail@v2.4.0
   with:
-    # SMTP server address
     server_address: smtp.gmail.com
-    # SMTP server port
     server_port: 465
-    # Authenticate as this user to SMTP server
     username: spcloudserverteam@gmail.com
-    # Authenticate with this password to SMTP server
     password: mb@834228
-    # Subject of mail message
     subject: Xử lý project đi nàooo
-    # Body of mail message (might be a filename prefixed with file:// to read from)
     body: alo alo
-    # Recipients mail addresses (separated with comma)
     to: namlt@matbao.com
-    # Full name of mail sender (might be with an email address specified in <>)
     from: spcloudserverteam@gmail.com
-    # Carbon copy recipients (separated with comma)
-    cc: # optional
-    # Blind carbon copy recipients (separated with comma)
-    bcc: # optional
-    # Content-Type HTTP header (text/html or text/plain)
-    content_type: # optional, default is text/plain
-    # Convert body from Markdown to HTML (set content_type input as text/html too)
-    convert_markdown: # optional
-    # Files that will be added to mail message attachments (separated with comma)
-    attachments: # optional
+    cc: 
+    bcc: 
+    content_type: 
+    convert_markdown: 
+    attachments: 
