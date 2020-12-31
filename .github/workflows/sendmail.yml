@@ -1,6 +1,6 @@
  name: Send email
   # You may pin to the exact commit or the version.
-  # uses: dawidd6/action-send-mail@8be2ceac54300436b5973d0b389ad6d34c2e2c2d
+  uses: dawidd6/action-send-mail@8be2ceac54300436b5973d0b389ad6d34c2e2c2d
   uses: dawidd6/action-send-mail@v2.4.0
   with:
     # SMTP server address
