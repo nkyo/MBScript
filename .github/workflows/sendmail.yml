@@ -1,5 +1,5 @@
  name: Send email
-  uses: dawidd6/action-send-mail@v2.4.0
+  uses: dawidd6/action-send-mail@v2
   with:
     server_address: smtp.gmail.com
     server_port: 465
