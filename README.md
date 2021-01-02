@@ -10,6 +10,8 @@ INSTALLDIR='/usr/local/mbmenu/'
 
 Gõ lệnh mb sẽ tự động mở menu
 
+<img src="https://file.matbao.support/system/data/default_home_folder/Hinh/NamLT/putty_1KwHBNMnnq.png">
+
 Tham khảo thêm 
 https://www.rfxn.com/
 
