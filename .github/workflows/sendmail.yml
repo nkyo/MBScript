@@ -1,0 +1,16 @@
+ name: Send email
+  uses: dawidd6/action-send-mail@v2
+  with:
+    server_address: smtp.gmail.com
+    server_port: 465
+    username: spcloudserverteam@gmail.com
+    password: mb@834228
+    subject: Xử lý project đi nàooo
+    body: alo alo
+    to: namlt@matbao.com
+    from: spcloudserverteam@gmail.com
+    cc: 
+    bcc: 
+    content_type: 
+    convert_markdown: 
+    attachments: 
