@@ -9,7 +9,7 @@ Mỗi chức năng đều có 3 action cơ bản:
 Tương ứng với các file trong action:
 
 
-  + them
-  + danhsach
-  + sua
-  + xoa
+  + add
+  + list
+  + edit
+  + delete
