@@ -28,7 +28,10 @@ options=(
     "Tao Database" #0
     "Tao User" #1
     "Them User vao Database" #2
-    "Quay lai" #3
+    "Xoa Database" #3
+    "Xoa User" #4
+    "Danh sach Database" #5
+    "Quay lai" #6
 )
 PS3="
 -//- Nhap lua chon cua ban (1-${#options[@]}) [Ctrl+C=Thoat]: "
@@ -45,6 +48,15 @@ do
             '/usr/local/mbmenu/action/add_user_database'
             ;;
         "${options[3]}")
+            '/usr/local/mbmenu/action/delete_database'
+            ;;
+        "${options[4]}")
+            '/usr/local/mbmenu/action/delete_user'
+            ;;
+        "${options[5]}")
+            '/usr/local/mbmenu/action/list_database'
+            ;;
+        "${options[6]}")
         '/usr/local/bin/mb'
         ;;
         *) exit 1;;
