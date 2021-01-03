@@ -1,1 +1,10 @@
-check_mariadb
+#!/bin/bash
+mariadb=`ps -aux | grep -v grep | grep "/usr/bin/mysqld_safe" | wc -l`
+if [ "$mariadb" -ge "1" ]; then
+        echo "MariaDB is running."
+else
+        echo "`date` MariaDB is not running." >> /var/log/mariadb/mariadb-status.log
+        systemctl restart mariadb
+        echo "MariaDB has been restarted"
+fi
+
