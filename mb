@@ -32,7 +32,8 @@ options=(
     "Quan ly Database" #4
     "Quan ly PHP" #5
     "Quan ly Apache" #6
-	"Thiet Lap Backup" #7
+    "Thiet Lap Backup" #7
+    "Thiet lap AutoCheck" #8
 )
 PS3="
 -//- Nhap lua chon cua ban (1-${#options[@]}) [Ctrl+C=Thoat]: "
@@ -60,8 +61,11 @@ do
         "${options[6]}")
             '/usr/local/mbmenu/mbapache'
             ;;
-		"${options[7]}")
+	"${options[7]}")
             '/usr/local/mbmenu/mbbackup'
+            ;;
+	 "${options[8]}")
+            '/usr/local/mbmenu/mbautocheck'
             ;;
         *) exit 1;;
     esac
