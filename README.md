@@ -32,3 +32,5 @@ https://github.com/jjorae/mysql_health_check/blob/master/health_check.sh
 https://github.com/DRodero/mysql_backup/blob/master/mysql_backup.sh
 
 https://www.2daygeek.com/linux-show-running-queries-mysql-mariadb/
+
+https://www.cyberciti.biz/faq/mysql-change-root-password/
