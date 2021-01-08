@@ -25,8 +25,8 @@ echo "Huong dan: /check cpu > 90% , ram> 90 % , apache, mysql and restar when st
 echo "//---------------------------------------------------------------------//"
 echo
 options=(
-    "Cai dat mbAutocheck" #0
-    "Xoa MbAutoCheck" #1
+    "Cai dat MBAutocheck" #0
+    "Xoa MBAutoCheck" #1
     "Quay lai" #2
 )
 PS3="
@@ -45,4 +45,4 @@ do
         ;;
         *) exit 1;;
     esac
- done
+done
