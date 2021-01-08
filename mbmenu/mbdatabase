@@ -21,17 +21,17 @@ echo "                      MBscript URL"
 echo "-------------------------------------------------------------------------"
 echo "Status: $status | Disk: ${use_disk}/${total_disk} GB | Ram: ${use_ram}/${total_ram} MB | Swap: ${use_swap}/${total_swap} MB"
 echo "-------------------------------------------------------------------------"
+echo "- 5. Quan ly Database - MariaDB: $(mysql --version | cut -f6 -d' ' | cut -f1 -d'-') - $(systemctl status mariadb.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "-----------------------------------------------------------------------"
 echo "Huong dan: /documentation"
 echo "//---------------------------------------------------------------------//"
 echo
 options=(
-    "Tao Database" #0
-    "Tao User" #1
-    "Them User vao Database" #2
-    "Xoa Database" #3
-    "Xoa User" #4
-    "Danh sach Database" #5
-    "Quay lai" #6
+    "Tao Databse va User" #0
+    "Thay doi Password User" #1
+    "Xoa Database" #2
+    "Danh sach Database" #3
+    "Quay lai" #4
 )
 PS3="
 -//- Nhap lua chon cua ban (1-${#options[@]}) [Ctrl+C=Thoat]: "
@@ -39,26 +39,21 @@ select opt in "${options[@]}"
 do
     case $opt in
         "${options[0]}")
-            '/usr/local/mbmenu/action/database/create_database'
+            '/usr/local/mbmenu/action/database/create_database_user'
             ;;
         "${options[1]}")
-            '/usr/local/mbmenu/action/database/create_user'
+            '/usr/local/mbmenu/action/database/change_password_user'
             ;;
         "${options[2]}")
-            '/usr/local/mbmenu/action/add_user_database'
+            '/usr/local/mbmenu/action/database/delete_database'
             ;;
         "${options[3]}")
-            '/usr/local/mbmenu/action/delete_database'
+            '/usr/local/mbmenu/action/database/list_database'
             ;;
         "${options[4]}")
-            '/usr/local/mbmenu/action/delete_user'
-            ;;
-        "${options[5]}")
-            '/usr/local/mbmenu/action/list_database'
-            ;;
-        "${options[6]}")
         '/usr/local/bin/mb'
         ;;
         *) exit 1;;
     esac
 done
+                                        
