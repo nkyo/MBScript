@@ -1,0 +1,7 @@
+echo "--//---------------------------------------------------------------------"
+echo "5. Quan ly Database > Danh sach Database"
+echo "/-----------------------------------------------------------------------/"
+echo
+db_admin_password=$(cat /usr/local/mbmenu/data/.my.cnf)
+mysql -u root -p"$db_admin_password" -e "show databases where \`database\` not in('information_schema', 'test', 'sys', 'phpmyadmin', 'mysql', 'performance_schema')"
+~
