@@ -1,0 +1,76 @@
+#!/bin/bash
+# info: add php  version alias to .bash_aliases
+# options: USER VERSION
+# labels: hestia
+#
+# example: v-change-user-php-cli user php7.4
+#
+# add line to .bash_aliases to set default php command line
+# version when multi-php is enabled.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+user=$1
+version=$2
+
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+# Reading user values
+source $USER_DATA/user.conf
+
+FILE=$HOMEDIR/$user/.bash_aliases
+
+is_format_valid 'user'
+is_object_valid 'user' 'USER' "$user"
+is_object_unsuspended 'user' 'USER' "$user"
+
+# Verify php version format
+if [[ ! $version =~ ^[0-9]\.[0-9]+ ]]; then
+    echo "The php version format is invalid, it should look like [0-9].[0-9]..."
+    exit
+fi
+
+# Check if php version is supported
+if [ ! -f "$HESTIA_INSTALL_DIR/multiphp/$WEB_SYSTEM/PHP-${version//.}.sh" ]; then
+    echo "Version is currently not supported or does not exist..."
+    exit
+fi
+
+#create .bash_aliases is not exsists
+if [ ! -f "$FILE" ]; then
+    touch "$FILE"
+fi
+
+if grep -q "alias php='env php$version'" "$FILE"; then
+  echo "PHP CLI Already defined"
+  exit;
+fi
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+sed -i "/alias php='env/d" "$FILE"
+
+echo "alias php='env php$version'" >> $FILE
+
+update_user_value "$user" '$PHPCLI' "$version"
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+exit

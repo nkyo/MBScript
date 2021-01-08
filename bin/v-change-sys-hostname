@@ -1,0 +1,62 @@
+#!/bin/bash
+# info: change hostname
+# options: HOSTNAME
+# labels: panel
+#
+# example: v-change-sys-hostname mydomain.tld
+#
+# The function for changing system hostname.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+domain=$1
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '1' "$#" 'HOSTNAME'
+is_format_valid 'domain'
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+hostname $domain
+
+if [ -d "/etc/sysconfig" ]; then
+    # RHEL/CentOS/Amazon
+    touch /etc/sysconfig/network
+    if [ -z "$(grep HOSTNAME /etc/sysconfig/network)" ]; then
+        echo "HOSTNAME='$domain'" >> /etc/sysconfig/network
+    else
+        sed -i "s/HOSTNAME=.*/HOSTNAME='$domain'/" /etc/sysconfig/network
+    fi
+else
+    # Debian/Ubuntu
+    hostnamectl set-hostname $domain
+    echo "$domain" > /etc/hostname
+fi
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Logging
+log_event "$OK" "$ARGUMENTS"
+
+exit

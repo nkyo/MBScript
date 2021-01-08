@@ -1,0 +1,79 @@
+#!/bin/bash
+# info: restart mail service
+# options: NONE
+# labels: mail
+#
+# example: v-restart-mail
+#
+# The function tells exim or dovecot services to reload configuration files.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+PATH="$PATH:/usr/local/sbin:/sbin:/usr/sbin:/root/bin"
+
+send_email_report() {
+    local mail_service="$1"
+    journalctl --no-pager --reverse --since=-1m --unit "$mail_service" >> "$tmpfile" 2>&1
+    email=$(grep CONTACT $HESTIA/data/users/admin/user.conf)
+    email=$(echo "$email" | cut -f 2 -d "'")
+    subj="$(hostname): $mail_service restart failed"
+    cat "$tmpfile" |$SENDMAIL -s "$subj" $email
+    [[ -f "$tmpfile" ]] && rm -f $tmpfile
+}
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Exit
+if [ "$1" = "no" ]; then
+    exit
+fi
+
+# Schedule restart
+if [ "$1" = 'scheduled' ] || [ -z "$1" -a "$SCHEDULED_RESTART" = 'yes' ]; then
+    sed -i "/\/$SCRIPT now/d" $HESTIA/data/queue/restart.pipe
+    echo "$BIN/$SCRIPT now" >> $HESTIA/data/queue/restart.pipe
+    exit
+fi
+
+if [ -z "$MAIL_SYSTEM" ] || [ "$MAIL_SYSTEM" = 'remote' ]; then
+    exit
+fi
+
+tmpfile=$(mktemp)
+# Restart IMAP system if present
+if [ ! -z "$IMAP_SYSTEM" ]; then
+    $BIN/v-restart-service $IMAP_SYSTEM >> $tmpfile 2>&1
+    if [ $? -ne 0 ]; then
+        send_email_report "$IMAP_SYSTEM"
+        check_result $E_RESTART "$IMAP_SYSTEM restart failed"
+    fi
+fi
+
+# Restart mail system
+$BIN/v-restart-service $MAIL_SYSTEM >> $tmpfile 2>&1
+if [ $? -ne 0 ]; then
+    send_email_report "$MAIL_SYSTEM"
+    check_result $E_RESTART "$MAIL_SYSTEM restart failed"
+fi
+
+# Update restart queue
+if [ -e "$HESTIA/data/queue/restart.pipe" ]; then
+    sed -i "/\/$SCRIPT now/d" $HESTIA/data/queue/restart.pipe
+fi
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+[[ -f "$tmpfile" ]] && rm -f $tmpfile
+exit

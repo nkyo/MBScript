@@ -1,0 +1,36 @@
+#!/bin/bash
+# info: update dns templates
+# options: [RESTART]
+# labels: dns
+#
+# example: v-update-dns-templates
+#
+# The function for obtaining updated dns templates from Hestia package.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+restart=$1
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Update templates
+cp -rf $HESTIA_INSTALL_DIR/templates/dns $HESTIA/data/templates/
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Clean tmpdir
+rm -rf $tmpdir
+
+exit

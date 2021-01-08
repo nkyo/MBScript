@@ -1,0 +1,114 @@
+#!/bin/bash
+# info: list system themes
+# options: [FORMAT]
+# labels: hestia
+#
+# example: v-list-sys-themes
+#
+# The function for obtaining the list of themes in the theme
+# library and displaying them in the backend or user interface.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+format=${1-shell}
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+# JSON list function
+json_list() {
+    object1=$(echo "$themes" |wc -w)
+    object2=$(echo "$themes_custom" |wc -w)
+    i=1
+    echo '['
+    for theme in $themes; do
+        if [ "$i" -lt "$object1" ]; then
+            echo -e  "\t\"$theme\","
+        else
+            if [ $object2 -gt 0 ]; then
+                echo -e  "\t\"$theme\","
+            else
+                echo -e  "\t\"$theme\""            
+            fi
+        fi
+        (( ++i))
+    done
+    for custom_theme in $themes_custom; do
+        if [ "$i" -lt "$object2" ]; then
+            echo -e  "\t\"$custom_theme\","
+        else
+            echo -e  "\t\"$custom_theme\""
+        fi
+        (( ++i))
+    done
+    echo "]"
+}
+
+# SHELL list function
+shell_list() {
+    echo "THEME"
+    echo "------"
+    for theme in $themes; do
+        echo "$theme"
+    done
+    for custom_theme in $themes_custom; do
+        echo "$custom_theme"
+    done
+}
+
+# PLAIN list function
+plain_list() {
+    for theme in $themes; do
+        echo "$theme"
+    done
+    for custom_theme in $themes_custom; do
+        echo "$custom_theme"
+    done
+}
+
+# CSV list function
+csv_list() {
+    echo "THEME"
+    for theme in $themes; do
+        echo "$theme"
+    done
+    for custom_theme in $themes_custom; do
+        echo "$custom_theme"
+    done
+}
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Parsing templates
+
+# System provided themes
+themes=$(ls -v $HESTIA_THEMES/)
+themes=$(echo "$themes" | grep '\.css' | sed 's/\.css$//')
+
+# Custom themes
+themes_custom=$(ls -v $HESTIA_THEMES_CUSTOM/)
+themes_custom=$(echo "$themes_custom" | grep '\.css' | sed 's/\.css$//')
+
+
+# Listing data
+case $format in
+    json)   json_list ;;
+    plain)  plain_list ;;
+    csv)    csv_list ;;
+    shell)  shell_list ;;
+esac
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+exit

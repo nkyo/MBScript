@@ -1,0 +1,60 @@
+#!/bin/bash
+# info: copy directory
+# options: USER SRC_DIRECTORY DST_DIRECTORY
+# labels: 
+#
+# example: v-copy-fs-directory alice /home/alice/dir1 /home/bob/dir2
+#
+# The function copies directory on the file system
+
+user=$1
+src_dir=$2
+dst_dir=$3
+
+# Includes
+source $HESTIA/func/main.sh
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '3' "$#" 'USER SRC_DIRECTORY DST_DIRECTORY'
+is_format_valid 'user'
+is_object_valid 'user' 'USER' "$user"
+
+# Checking user homedir
+homedir=$(grep "^$user:" /etc/passwd | cut -f 6 -d :)
+if [ -z $homedir ]; then
+    echo "Error: user home directory doesn't exist"
+    exit 12
+fi
+
+# Checking source dir
+if [ ! -e "$src_dir" ]; then
+    echo "Error: source directory $src_dir doesn't exist"
+    exit 3
+fi
+
+# Checking source path
+rpath=$(readlink -f "$src_dir")
+if [ -z "$(echo $rpath |egrep "^/tmp|^$homedir")" ]; then
+    echo "Error: invalid source path $src_dir"
+    exit 2
+fi
+
+# Checking destination path
+rpath=$(readlink -f "$dst_dir")
+if [ -z "$(echo $rpath |egrep "^/tmp|^$homedir")" ]; then
+    echo "Error: invalid destination path $dst_dir"
+    exit 2
+fi
+
+# Copying directory
+user_exec cp -rf "$src_dir" "$dst_dir" >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "Error: directory $src_dir was not copied"
+    exit 3
+fi
+
+# Exiting
+exit

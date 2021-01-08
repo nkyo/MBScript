@@ -1,0 +1,99 @@
+#!/bin/bash
+# info: change firewall rule
+# options: RULE ACTION IP PORT [PROTOCOL] [COMMENT]
+# labels: 
+#
+# example: v-change-firewall-rule 3 ACCEPT 5.188.123.17 443
+#
+# The function is used for changing existing firewall rule.
+# It fully replace rule with new one but keeps same id.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Importing system variables
+source /etc/profile
+
+# Argument definition
+rule=$1
+action=$(echo $2|tr '[:lower:]' '[:upper:]')
+ip=$3
+port_ext=$4
+protocol=${5-TCP}
+protocol=$(echo $protocol|tr '[:lower:]' '[:upper:]')
+comment=$6
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+# Sort function
+sort_fw_rules() {
+    cat $HESTIA/data/firewall/rules.conf |\
+        sort -n -k 2 -t \' > $HESTIA/data/firewall/rules.conf.tmp
+    mv -f $HESTIA/data/firewall/rules.conf.tmp \
+        $HESTIA/data/firewall/rules.conf
+}
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '5' "$#" 'RULE ACTION IP  PORT [PROTOCOL] [COMMENT]'
+is_format_valid 'rule' 'action' 'protocol' 'port_ext'
+if [ ! -z "$comment" ]; then
+    is_format_valid 'comment'
+fi
+is_system_enabled "$FIREWALL_SYSTEM" 'FIREWALL_SYSTEM'
+is_object_valid '../../data/firewall/rules' 'RULE' "$rule"
+
+if [[ "$ip" =~ ^ipset: ]]; then
+    ipset_name="${ip#ipset:}"
+    v-list-firewall-ipset plain | grep "^$ipset_name\s" >/dev/null
+    check_result $? 'ipset object not found' $E_NOTEXIST
+else
+    is_format_valid 'ip'
+fi
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Generating timestamp
+time_n_date=$(date +'%T %F')
+time=$(echo "$time_n_date" |cut -f 1 -d \ )
+date=$(echo "$time_n_date" |cut -f 2 -d \ )
+
+# Concatenating firewall rule
+str="RULE='$rule' ACTION='$action' PROTOCOL='$protocol' PORT='$port_ext'"
+str="$str IP='$ip' COMMENT='$comment' SUSPENDED='no'"
+str="$str TIME='$time' DATE='$date'"
+
+# Deleting old rule
+sed -i "/RULE='$rule' /d" $HESTIA/data/firewall/rules.conf
+
+# Adding new
+echo "$str" >> $HESTIA/data/firewall/rules.conf
+
+# Sorting firewall rules by id number
+sort_fw_rules
+
+# Updating system firewall
+$BIN/v-update-firewall
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Logging
+log_event "$OK" "$ARGUMENTS"
+
+exit

@@ -1,0 +1,76 @@
+#!/bin/bash
+# info: change hestia ssl certificate
+# options: SSL_DIR [RESTART]
+# labels: panel
+#
+# example: v-change-sys-hestia-ssl /home/new/dir/path yes
+#
+# The function changes hestia SSL certificate and the key.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+domain='certificate'
+ssl_dir=$1
+restart=$2
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/func/domain.sh
+source $HESTIA/conf/hestia.conf
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '1' "$#" 'SSL_DIR [RESTART]'
+is_format_valid 'ssl_dir'
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Checking new certificate
+certificate=$(cat $ssl_dir/$domain.crt |grep -n END)
+certificate_count=$(echo "$certificate" |wc -l)
+if [ "$certificate_count" -gt 1 ]; then
+    crt_end=$(echo "$certificate" |head -n1 |cut -f 1 -d :)
+    crt_lines=$(wc -l $ssl_dir/$domain.crt |cut -f1 -d ' ')
+    pem_begin=$((crt_lines - crt_end))
+    mv $ssl_dir/$domain.crt $ssl_dir/$domain.crt_full
+    head -n $crt_end $ssl_dir/$domain.crt_full > $ssl_dir/$domain.crt
+    tail -n $pem_begin $ssl_dir/$domain.crt_full > $ssl_dir/$domain.ca
+    is_web_domain_cert_valid
+    mv -f $ssl_dir/$domain.crt_full $ssl_dir/$domain.crt
+    rm -f $ssl_dir/$domain.ca
+else
+    is_web_domain_cert_valid
+fi
+
+# Adding new certificate
+cp -f $ssl_dir/certificate.crt $HESTIA/ssl/certificate.crt
+cp -f $ssl_dir/certificate.key $HESTIA/ssl/certificate.key
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Restarting web server
+if [ "$restart" != 'no' ]; then
+    kill -HUP $(cat /var/run/hestia-nginx.pid)
+    $BIN/v-restart-mail $restart
+fi
+
+# Logging
+log_event "$OK" "$ARGUMENTS"
+
+exit

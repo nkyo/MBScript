@@ -1,0 +1,43 @@
+#!/bin/bash
+# info: generate api key
+# options: NONE
+# labels: panel
+#
+# example: v-generate-api-key 
+#
+# The function creates a key file in $HESTIA/data/keys/
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+keygen() {
+    < /dev/urandom tr -dc _A-Z-a-z-0-9 | head -c${1:-32};echo;
+}
+KEYS="$HESTIA/data/keys/"
+HASH=$(keygen)
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+if [ ! -d ${KEYS} ]; then
+  mkdir -p ${KEYS}
+fi
+
+if [[ -e ${KEYS}${HASH} ]] ; then
+    while [[ -e ${KEYS}${HASH} ]] ; do
+        HASH=$(keygen)
+    done
+fi
+
+touch ${KEYS}${HASH}
+echo ${HASH}
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+exit

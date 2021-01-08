@@ -1,0 +1,133 @@
+#!/bin/bash
+# info: change database owner
+# options: DATABASE USER
+# labels: 
+#
+# example: v-change-database-owner mydb alice
+#
+# The function for changing database owner.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+database=$1
+user=$2
+
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/func/db.sh
+source $HESTIA/func/rebuild.sh
+source $HESTIA/conf/hestia.conf
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '2' "$#" 'DATABASE USER'
+is_format_valid 'database' 'user'
+is_system_enabled "$DB_SYSTEM" 'DB_SYSTEM'
+is_object_valid 'user' 'USER' "$user"
+is_object_unsuspended 'user' 'USER' "$user"
+
+# Check owner existance
+owner=$(echo $database | cut -f 1 -d '_')
+if [ ! -d "$HESTIA/data/users/$owner" ]; then
+    echo "Error: database owner doesn't exist"
+    log_event "$E_NOTEXIST" "$ARGUMENTS"
+    exit $E_NOTEXIST
+fi
+
+# Check if owner is the same as the dst user
+if [ "$owner" = "$user" ]; then
+    exit
+fi
+
+# Check db existance
+db_data=$(grep "DB='$database'" $HESTIA/data/users/$owner/db.conf)
+if [ -z "$db_data" ]; then
+    echo "Error: database $database doesn't exist"
+    log_event "$E_NOTEXIST" "$ARGUMENTS"
+    exit $E_NOTEXIST
+fi
+
+parse_object_kv_list "$db_data"
+#Fix issue #1084 with "Upper case not allowed with PGSQL"
+if [ "$TYPE" == "pgsql" ]; then
+   usersmall=$(echo "$user" | tr '[:upper:]' '[:lower:]');
+else
+   usersmall=$user
+fi
+
+# Check if database name is uniqe
+new_db=$(echo $database | sed "s/^${owner}_/${usersmall}_/")
+check_db=$(grep "DB='$new_db'" $HESTIA/data/users/$user/db.conf)
+if [ ! -z "$check_db" ]; then
+    echo "Error: $new_db database exists"
+    log_event "$E_EXISTS" "$ARGUMENTS"
+    exit $E_EXISTS
+fi
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Creating temporary directory
+tmpdir=$(mktemp -p $BACKUP -d "tmp.$database.XXXXXXXXXX" > /dev/null 2>&1)
+
+# Suspend database
+$BIN/v-suspend-database $owner $database > /dev/null 2>&1
+
+# Dump database
+dump="$tmpdir/$database.$TYPE.sql"
+grants="$tmpdir/$database.$TYPE.$DBUSER"
+case $TYPE in
+    mysql) dump_mysql_database ;;
+    pgsql) dump_pgsql_database ;;
+esac
+
+# Import configuration
+db_data=$(echo "$db_data" | sed "s/'${owner}_/'${usersmall}_/g")
+echo "$db_data" >> $HESTIA/data/users/$user/db.conf
+parse_object_kv_list "$db_data"
+
+# Unsuspend db
+$BIN/v-unsuspend-database $user $new_db > /dev/null 2>&1
+
+# Rebuild databases
+$BIN/v-rebuild-databases $user
+
+# Import dump
+case $TYPE in
+    mysql) import_mysql_database $dump ;;
+    pgsql) import_pgsql_database $dump ;;
+esac
+
+# Deleting tmpdir
+rm -rf $tmpdir
+
+# Remove old database
+$BIN/v-unsuspend-database $owner $database > /dev/null 2>&1
+$BIN/v-delete-database $owner $database > /dev/null 2>&1
+
+# Update counters
+$BIN/v-update-user-counters $owner
+$BIN/v-update-user-counters $user
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Logging
+log_event "$OK" "$ARGUMENTS"
+
+exit

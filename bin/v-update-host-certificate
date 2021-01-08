@@ -1,0 +1,99 @@
+#!/bin/bash
+# info: update host certificate for hestia
+# options: USER HOSTNAME
+# labels: panel
+#
+# example: v-update-host-certificate admin example.com
+#
+# Function updates certificates for hestia
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+whoami=$(whoami)
+if [ "$whoami" != "root" ] && [ "$whoami" != "admin" ] ; then
+    echo "Error: this script must be run as root or admin.";
+    exit 1;
+fi
+
+
+# Argument definition
+user=$1
+hostname=$2
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/func/ip.sh
+source $HESTIA/conf/hestia.conf
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '1' "$#" '[USER] [HOSTNAME]'
+is_format_valid 'user'
+is_system_enabled "$WEB_SYSTEM" 'WEB_SYSTEM'
+is_system_enabled "$WEB_SSL" 'SSL_SUPPORT'
+is_object_valid 'user' 'USER' "$user"
+is_object_unsuspended 'user' 'USER' "$user"
+is_object_valid 'web' 'DOMAIN' "$hostname"
+is_object_unsuspended 'web' 'DOMAIN' "$hostname"
+
+if [ ! -f "/home/$user/conf/web/$hostname/ssl/$hostname.pem" ]; then
+    echo "Error: domain $hostname does not have an SSL certificate.";
+    exit 1;
+fi
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Get current datetime for backup of old files
+backup_datetime=`date '+%Y-%m-%d_%H-%M-%S'`
+
+# Copy hostnames certificates from user dir
+cp /home/$user/conf/web/$hostname/ssl/$hostname.pem $HESTIA/ssl/certificate.crt
+cp /home/$user/conf/web/$hostname/ssl/$hostname.key $HESTIA/ssl/certificate.key
+
+# Enable fallback support for mail domains that do not support SSL
+if [[ "$MAIL_SYSTEM" =~ exim ]]; then
+    # Checking exim username for later chowning
+    exim_user="exim";
+    check_exim_username=$(grep -c '^Debian-exim:' /etc/passwd)
+    if [ "$check_exim_username" -eq 1 ]; then
+        exim_user="Debian-exim"
+    fi
+
+    # Assign exim permissions to certificate
+    chown $exim_user:mail $HESTIA/ssl/certificate.crt
+    chown $exim_user:mail $HESTIA/ssl/certificate.key
+fi
+
+# Add UPDATE_HOSTNAME_SSL if not exist
+if [ -z "$UPDATE_HOSTNAME_SSL" ]; then
+    echo "UPDATE_HOSTNAME_SSL='yes'" >> $HESTIA/conf/hestia.conf
+fi
+
+# Restart services
+$BIN/v-restart-web
+$BIN/v-restart-proxy
+if [ ! -z "$MAIL_SYSTEM" ]; then
+    # Restart exim (and dovecot if applicable)
+    $BIN/v-restart-mail
+fi
+if [ "$FTP_SYSTEM" = "vsftpd" ]; then
+    $BIN/v-restart-ftp
+fi
+$BIN/v-restart-service hestia
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Logging
+log_event "$OK" "$ARGUMENTS"
+
+exit 0;

@@ -1,0 +1,70 @@
+#!/bin/bash
+# info: add mail domain catchall account
+# options: USER DOMAIN EMAIL
+# labels: mail
+#
+# example: v-add-mail-domain-catchall admin example.com master@example.com
+#
+# The function enables catchall account for incoming emails.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+user=$1
+domain=$2
+domain_idn=$2
+email="$3"
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/func/domain.sh
+source $HESTIA/conf/hestia.conf
+
+# Additional argument formatting
+format_domain
+format_domain_idn
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '3' "$#" 'USER DOMAIN EMAIL'
+is_format_valid 'user' 'domain' 'email'
+is_system_enabled "$MAIL_SYSTEM" 'MAIL_SYSTEM'
+is_object_valid 'user' 'USER' "$user"
+is_object_unsuspended 'user' 'USER' "$user"
+is_object_valid 'mail' 'DOMAIN' "$domain"
+is_object_unsuspended 'mail' 'DOMAIN' "$domain"
+is_object_value_empty 'mail' 'DOMAIN' "$domain" '$CATCHALL'
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Adding catchall alias
+if [[ "$MAIL_SYSTEM" =~ exim ]]; then
+    sed -i "/*@$domain_idn:/d" $HOMEDIR/$user/conf/mail/$domain/aliases
+    echo "*@$domain_idn:$email" >> $HOMEDIR/$user/conf/mail/$domain/aliases
+fi
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Adding antispam in config
+update_object_value 'mail' 'DOMAIN' "$domain" '$CATCHALL' "$email"
+
+# Logging
+log_history "added $email as catchall email for $domain"
+log_event "$OK" "$ARGUMENTS"
+
+exit

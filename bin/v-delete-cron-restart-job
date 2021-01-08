@@ -1,0 +1,45 @@
+#!/bin/bash
+# info: delete restart job
+# options: NONE
+# labels: 
+#
+# The script for disabling restart cron tasks
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+is_system_enabled "$CRON_SYSTEM" 'CRON_SYSTEM'
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Add cron job
+cmd="sudo $HESTIA/bin/v-update-sys-queue restart"
+check_cron=$(grep "$cmd" $HESTIA/data/users/admin/cron.conf 2> /dev/null)
+if [ ! -z "$check_cron" ]; then
+    parse_object_kv_list "$check_cron"
+    $BIN/v-delete-cron-job admin "$JOB"
+fi
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Logging
+log_event "$OK" "$ARGUMENTS"
+
+exit

@@ -1,0 +1,53 @@
+#!/bin/bash
+# info: change file permission
+# options: USER FILE PERMISSIONS
+# labels: 
+#
+# example: v-change-fs-file-permission admin readme.txt 0777
+#
+# The function changes file access permissions on the file system
+
+user=$1
+src_file=$2
+permissions=$3
+
+# Includes
+source $HESTIA/func/main.sh
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '3' "$#" 'USER FILE PERMISSIONS'
+is_format_valid 'user'
+is_object_valid 'user' 'USER' "$user"
+
+# Checking user homedir
+homedir=$(grep "^$user:" /etc/passwd | cut -f 6 -d :)
+if [ -z $homedir ]; then
+    echo "Error: user home directory doesn't exist"
+    exit 12
+fi
+
+# Checking source file
+if [ ! -fe "$src_file" ]; then
+    echo "Error: source file doesn't exist $src_file"
+    exit 3
+fi
+
+# Checking source path
+rpath=$(readlink -f "$src_file")
+if [ -z "$(echo $rpath |egrep "^/tmp|^$homedir")" ]; then
+    echo "Error: invalid source path $src_file"
+    exit 2
+fi
+
+# Changing file permissions
+user_exec chmod -R $permissions "$src_file" >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "Error: access permission on $src_file was not changed"
+    exit 3
+fi
+
+# Exiting
+exit

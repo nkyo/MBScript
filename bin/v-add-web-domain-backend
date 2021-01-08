@@ -1,0 +1,96 @@
+#!/bin/bash
+# info: add web domain backend
+# options: USER DOMAIN [TEMPLATE] [RESTART]
+# labels: web
+#
+# example: v-add-web-domain-backend admin exmaple.com default yes
+#
+# The call is used for adding web backend configuration.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+user=$1
+domain=$2
+template=${3-default}
+restart=$4
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/func/domain.sh
+source $HESTIA/conf/hestia.conf
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '2' "$#" 'USER DOMAIN [TEMPLATE] [RESTART]'
+is_format_valid 'user' 'domain'
+is_system_enabled "$WEB_BACKEND" 'WEB_BACKEND'
+is_object_valid 'user' 'USER' "$user"
+is_backend_template_valid "$template"
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Defining pool directory
+prepare_web_backend
+get_domain_values 'web'
+
+# Checking backend configuration
+#if [ -e "$pool/$backend_type.conf" ]; then
+#    exit
+#fi
+
+# Allocating backend port
+backend_port=9000
+ports=$(grep -v '^;' $pool/* 2>/dev/null |grep listen |grep -o :[0-9].*)
+ports=$(echo "$ports" |sed "s/://" |sort -n)
+for port in $ports; do
+    if [ "$backend_port" -eq "$port" ]; then
+        backend_port=$((backend_port + 1))
+    fi
+done
+
+# Adding backend config
+cat $WEBTPL/$WEB_BACKEND/$template.tpl |\
+    sed -e "s|%backend_port%|$backend_port|" \
+        -e "s|%user%|$user|g"\
+        -e "s|%domain%|$domain|g"\
+        -e "s|%backend%|$backend_type|g"\
+        -e "s|%backend_version%|$backend_version|g" > $pool/$backend_type.conf
+
+
+# Set correct document root path
+if [ ! -z "$CUSTOM_DOCROOT" ]; then
+    docroot="$CUSTOM_DOCROOT"
+    if [ ! -z "$CUSTOM_PHPROOT" ]; then
+        docroot="$CUSTOM_PHPROOT"
+    fi
+    sed -i "s|/home\/$user\/web\/$domain\/public_html|$docroot|g"  $pool/$backend_type.conf
+else
+    docroot="$HOMEDIR/$user/web/$domain/public_html/"
+fi
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Restart backend server
+$BIN/v-restart-web-backend $restart
+check_result $? "Web backend restart failed" >/dev/null
+
+# Logging
+log_history "added $WEB_BACKEND backend configuration for $domain"
+log_event "$OK" "$ARGUMENTS"
+
+exit

@@ -1,0 +1,87 @@
+#!/bin/bash
+# info: add system sftp jail
+# options: [RESTART]
+# labels: 
+#
+# example: v-add-sys-sftp-jail yes
+#
+# The script enables sftp jailed environment
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Includes
+source /etc/profile
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+restart=$1
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Checking sshd directives
+config='/etc/ssh/sshd_config'
+sftp_n=$(grep -n "Subsystem.*sftp" $config |grep -v internal |grep -v ":#")
+sftp_i=$(grep -n "^# Hestia SFTP Chroot" $config)
+
+# Disabling normal sftp
+if [ ! -z "$sftp_n" ]; then
+    fline=$(echo $sftp_n |cut -f 1 -d :)
+    sed -i "${fline}s/Subsystem.*sftp/#Subsystem sftp/" $config
+    restart='yes'
+fi
+
+# Enabling jailed sftp
+if [ -z "$sftp_i" ]; then
+    echo " " >> $config
+    echo "# Hestia SFTP Chroot" >> $config
+    echo "Match User sftp_dummy99" >> $config
+    echo "ChrootDirectory %h" >> $config
+    echo "    X11Forwarding no" >> $config
+    echo "    AllowTCPForwarding no" >> $config
+    echo "    ForceCommand internal-sftp" >> $config
+    restart='yes'
+fi
+
+# Validating opensshd config
+if [ "$restart" = 'yes' ]; then
+    subj="OpenSSH restart failed"
+    email=$(grep CONTACT $HESTIA/data/users/admin/user.conf |cut -f 2 -d \')
+    /usr/sbin/sshd -t >/dev/null 2>&1
+    if [ "$?" -ne 0 ]; then
+        mail_text="OpenSSH can not be restarted. Please check config:
+            \n\n$(/usr/sbin/sshd -t)"
+        echo -e "$mail_text" |$SENDMAIL -s "$subj" $email
+    else
+        service ssh restart >/dev/null 2>&1
+    fi
+fi
+
+# Checking users
+shells="rssh|nologin"
+for user in $(grep "$HOMEDIR" /etc/passwd |egrep "$shells" |cut -f 1 -d:); do
+    $BIN/v-add-user-sftp-jail $user $restart
+done
+
+# Add v-add-sys-sftp-jail to startup
+if [ ! -e "/etc/cron.d/hestia-sftp" ]; then
+    echo "@reboot root sleep 60 && /usr/local/hestia/bin/v-add-sys-sftp-jail" > /etc/cron.d/hestia-sftp
+fi
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Logging
+log_event "$OK" "$ARGUMENTS"
+
+exit

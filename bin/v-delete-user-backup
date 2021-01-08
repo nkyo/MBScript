@@ -1,0 +1,75 @@
+#!/bin/bash
+# info: delete user backup
+# options: USER BACKUP
+# labels: panel
+#
+# example: v-delete-user-backup admin.2012-12-21_00-10-00.tar
+#
+# The function deletes user backup.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+user=$1
+backup=$2
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/func/backup.sh
+
+source $HESTIA/conf/hestia.conf
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '2' "$#" 'USER BACKUP'
+is_format_valid 'user' 'backup'
+is_system_enabled "$BACKUP_SYSTEM" 'BACKUP_SYSTEM'
+is_object_valid 'user' 'USER' "$user"
+is_object_unsuspended 'user' 'USER' "$user"
+is_object_valid 'backup' 'BACKUP' "$2"
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+line=$(grep "BACKUP='$backup'" $USER_DATA/backup.conf)
+parse_object_kv_list "$line"
+
+
+if [[ "$TYPE" =~ "sftp" ]]; then
+    sftp_delete "$backup"
+fi
+if [[ "$TYPE" =~ "ftp" ]] && [ "$deleted" == "0" ]; then
+    ftp_delete "backup"
+fi
+if [[ "$TYPE" =~ "local" ]]; then
+    rm -f $BACKUP/$2
+fi
+
+# Deleting backup
+sed -i "/BACKUP='$2' /d" $USER_DATA/backup.conf
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Update counter
+U_BACKUPS=$(grep BACKUP $USER_DATA/backup.conf |wc -l)
+update_user_value "$user" '$U_BACKUPS' "$U_BACKUPS"
+
+# Logging
+log_history "deleted backup archive $backup"
+log_event "$OK" "$ARGUMENTS"
+
+exit

@@ -1,0 +1,63 @@
+#!/bin/bash
+# info: change webmail alias url
+# options: WEBMAIL
+# labels: hestia panel
+#
+# example: v-change-sys-webmail YourtrickyURLhere
+#
+# This function changes the webmail url in apache2 or nginx configuration.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+# Get existing system webmail alias
+export $WEBMAIL_ALIAS
+
+# Define aliases
+OLD_ALIAS=$WEBMAIL_ALIAS
+NEW_ALIAS=$1
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Delete old webmail configuration
+for user in $($HESTIA/bin/v-list-sys-users plain); do
+    for domain in $($BIN/v-list-mail-domains $user plain |cut -f 1); do
+        $BIN/v-delete-sys-webmail $user $domain
+    done
+done
+
+# Set new webmail alias
+$BIN/v-change-sys-config-value 'WEBMAIL_ALIAS' $NEW_ALIAS
+
+# Add new webmail configuration
+for user in $($HESTIA/bin/v-list-sys-users plain); do
+    for domain in $($BIN/v-list-mail-domains $user plain |cut -f 1); do
+        $BIN/v-add-sys-webmail $user $domain
+    done
+done
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Restart services
+$BIN/v-restart-web $restart
+$BIN/v-restart-proxy $restart
+
+# Logging
+log_history "changed global webmail alias to $NEW_ALIAS" '' 'admin'
+log_event "$OK" "$ARGUMENTS"
+
+exit

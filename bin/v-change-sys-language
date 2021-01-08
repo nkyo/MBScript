@@ -1,0 +1,70 @@
+#!/bin/bash
+# info: change sys language
+# options: LANGUAGE [UPDATE_USERS]
+# labels: panel
+#
+# example: v-change-sys-language ru
+#
+# The function for changing system language.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+language=$1
+update_users=$2
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+
+is_language_valid() {
+    if [ ! -d "$HESTIA/web/locale/$language" ]; then
+        echo "Error: language file $language doesn't exist"
+        log_event "$E_NOTEXIST $ARGUMENTS"
+        exit $E_NOTEXIST
+    fi
+}
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '1' "$#" 'LANGUAGE [UPDATE_USERS]'
+is_format_valid 'language'
+is_language_valid $language
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Change language
+if [ -z "$(grep LANGUAGE $HESTIA/conf/hestia.conf)" ]; then
+    echo "LANGUAGE='$language'" >> $HESTIA/conf/hestia.conf
+else
+    sed -i "s/LANGUAGE=.*/LANGUAGE='$language'/g" $HESTIA/conf/hestia.conf
+fi
+
+# Update language for all existing users if specified
+if [ "$update_users" = "yes" ]; then
+    for user in $($HESTIA/bin/v-list-sys-users plain); do
+        $BIN/v-change-user-language $user $language
+    done
+fi
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Logging
+log_event "$OK" "$ARGUMENTS"
+
+exit

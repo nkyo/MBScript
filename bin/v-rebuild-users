@@ -1,0 +1,49 @@
+#!/bin/bash
+# info: rebuild system users
+# options: [RESTART]
+# labels: hestia
+#
+# example: v-rebuild-users
+#
+# The function all users on the system.
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+restart=$1
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/func/rebuild.sh
+source $HESTIA/conf/hestia.conf
+
+# Export sbin
+export PATH=$PATH:/usr/sbin
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Rebuild loop
+for user in $($HESTIA/bin/v-list-sys-users plain); do
+    $BIN/v-rebuild-user $user
+done
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Logging
+log_event "$OK" "$ARGUMENTS"
+
+exit

@@ -1,0 +1,41 @@
+#!/bin/bash
+# info: Delete log file for user
+# options: USER
+# labels: hestia
+#
+# example: v-delete-user-log user 
+#
+# The function for deleting a users log file
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+user=$1
+date=$(date "+%F %T")
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Remove log file
+if [ -z $user ]; then
+    echo "Error: no user specified."
+elif [ ! -f "$HESTIA/data/users/$user/history.log" ]; then
+    echo "Error: no history log found for $user."
+else
+    rm -f $HESTIA/data/users/$user/history.log
+fi
+
+log_history "Log for $user was cleared on $date."
+log_event "$OK" "$ARGUMENTS"
+
+exit

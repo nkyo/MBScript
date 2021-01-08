@@ -1,0 +1,98 @@
+#!/bin/bash
+# info: add cron job for hestia autoupdates
+# options: MODE
+# labels: 
+#
+# The function adds cronjob for hestia autoupdate from apt or git.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+user=admin
+mode=$1
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+is_system_enabled "$CRON_SYSTEM" 'CRON_SYSTEM'
+is_package_full 'CRON_JOBS'
+get_next_cronjob
+check_cron_apt=$(grep 'v-update-sys-hestia-all' $USER_DATA/cron.conf)
+check_cron_git=$(grep 'v-update-sys-hestia-git' $USER_DATA/cron.conf)
+if [ ! -z "$check_cron_apt" ] || [ ! -z "$check_cron_git" ]; then
+    exit
+fi
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Generating timestamp
+time_n_date=$(date +'%T %F')
+time=$(echo "$time_n_date" |cut -f 1 -d \ )
+date=$(echo "$time_n_date" |cut -f 2 -d \ )
+
+# Define time somewhere at night
+if [ -z "$mode" ] || [ "$mode" = "apt" ]; then
+    min=$(generate_password '012345' '2')
+    hour=$(generate_password '1234567' '1')
+    day='*'
+    month='*'
+    wday='*'
+    command='sudo /usr/local/hestia/bin/v-update-sys-hestia-all'
+fi
+
+if [ "$mode" = "git" ]; then
+    min='0'
+    hour='0'
+    day='*'
+    month='*'
+    wday='*'
+    command='sudo /usr/local/hestia/bin/v-update-sys-hestia-git'
+fi
+
+# Concatenating cron string
+str="JOB='$job' MIN='$min' HOUR='$hour' DAY='$day' MONTH='$month' WDAY='$wday'"
+str="$str CMD='$command' SUSPENDED='no' TIME='$time' DATE='$date'"
+
+# Adding to crontab
+echo "$str" >> $HESTIA/data/users/$user/cron.conf
+
+# Chaning permissions
+chmod 660 $HESTIA/data/users/$user/cron.conf
+
+# Sort jobs by id number
+sort_cron_jobs
+
+# Sync cronjobs with system crond
+sync_cron_jobs
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Increasing cron value
+increase_user_value $user '$U_CRON_JOBS'
+
+# Restarting crond
+$BIN/v-restart-cron
+check_result $? "Cron restart failed" >/dev/null
+
+# Logging
+log_history "enabled automatic updates"
+log_event "$OK" "$ARGUMENTS"
+
+exit

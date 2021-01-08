@@ -1,0 +1,46 @@
+#!/bin/bash
+# info: add directory
+# options: USER DIRECTORY
+# labels: 
+#
+# example: v-add-fs-directory admin mybar
+#
+# The function creates new directory on the file system
+
+user=$1
+dst_dir=$2
+
+# Includes
+source $HESTIA/func/main.sh
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '2' "$#" 'USER DIR'
+is_format_valid 'user'
+is_object_valid 'user' 'USER' "$user"
+
+# Checking user homedir
+homedir=$(grep "^$user:" /etc/passwd | cut -f 6 -d :)
+if [ -z $homedir ]; then
+    echo "Error: user home directory doesn't exist"
+    exit 12
+fi
+
+# Checking destination path
+rpath=$(readlink -f "$dst_dir")
+if [ -z "$(echo $rpath |egrep "^/tmp|^$homedir")" ]; then
+    echo "Error: invalid destination path $dst_dir"
+    exit 2
+fi
+
+# Adding directory
+user_exec mkdir -p "$dst_dir" >/dev/null 2>&1
+if [ $? -ne 0 ]; then
+    echo "Error: directory $dst_dir was not created"
+    exit 3
+fi
+
+# Exiting
+exit

@@ -1,0 +1,53 @@
+#!/bin/bash
+# info: rebuild cron jobs
+# options: USER [RESTART]
+# labels: panel
+#
+# example: v-rebuild-cron-jobs admin yes
+#
+# The function rebuilds system cron config file for specified user.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+user=$1
+restart=$2
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/conf/hestia.conf
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '1' "$#" 'USER [RESTART]'
+is_format_valid 'user'
+is_system_enabled "$CRON_SYSTEM" 'CRON_SYSTEM'
+is_object_valid 'user' 'USER' "$user"
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Rebuild cron jobs
+sync_cron_jobs
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Restarting crond
+$BIN/v-restart-cron $restart
+check_result $? "Cron restart failed" >/dev/null
+
+# Logging
+log_event "$OK" "$ARGUMENTS"
+
+exit

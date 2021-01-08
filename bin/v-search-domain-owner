@@ -1,0 +1,58 @@
+#!/bin/bash
+# info: search domain owner
+# options: DOMAIN [TYPE]
+# labels: panel
+#
+# example: v-search-domain-owner acme.com
+#
+# The function that allows to find user objects.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+domain=$1
+type=${2-any}
+
+# Includes
+source $HESTIA/func/main.sh
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '1' "$#" 'DOMAIN [TYPE]'
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Define conf 
+case $type in
+    web)    conf="$HESTIA/data/users/*/web.conf" ;;
+    dns)    conf="$HESTIA/data/users/*/dns.conf" ;;
+    mail)   conf="$HESTIA/data/users/*/mail.conf" ;;
+    *)      conf="$HESTIA/data/users/*/*.conf"
+esac
+
+
+owner=$(grep -H "DOMAIN='$domain'" $conf | head -n 1 | cut -f7 -d '/')
+if [ -z "$owner" ]; then
+    exit $E_NOTEXIST
+fi
+
+echo $owner
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Logging
+#log_event "$OK" "$ARGUMENTS"
+
+exit

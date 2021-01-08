@@ -1,0 +1,50 @@
+#!/bin/bash
+# info: restart operating system
+# options: RESTART [DELAY]
+# labels: panel
+#
+# example: v-restart-system yes
+#
+# The function restarts operating system.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+restart=$1
+delay=$2
+
+# Includes
+source $HESTIA/func/main.sh
+
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '1' "$#" 'RESTART [DELAY]'
+
+
+# Perform verification if read-only mode is enabled
+check_hestia_demo_mode
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+if [  "$restart" = 'yes' ]; then
+    if [ "$delay" ]; then
+        echo "The server will restart in $delay seconds..."
+        sleep $delay
+    fi
+    /sbin/reboot
+fi
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+exit

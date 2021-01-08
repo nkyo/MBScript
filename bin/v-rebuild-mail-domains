@@ -1,0 +1,88 @@
+#!/bin/bash
+# info: rebuild mail domains
+# options: USER
+# labels: mail
+#
+# example: v-rebuild-mail-domains admin
+#
+# The function rebuilds EXIM configuration files for all mail domains.
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+user=$1
+
+# Includes
+source $HESTIA/func/main.sh
+source $HESTIA/func/domain.sh
+source $HESTIA/func/rebuild.sh
+source $HESTIA/func/ip.sh
+source $HESTIA/conf/hestia.conf
+
+# Define mail user
+if [ "$MAIL_SYSTEM" = 'exim4' ]; then
+    MAIL_USER=Debian-exim
+else
+    MAIL_USER=exim
+fi
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '1' "$#" 'USER'
+is_format_valid 'user'
+is_system_enabled "$MAIL_SYSTEM" 'MAIL_SYSTEM'
+is_object_valid 'user' 'USER' "$user"
+is_object_unsuspended 'user' 'USER' "$user"
+if [ "$MAIL_SYSTEM" = 'remote' ]; then
+    exit
+fi
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Reset counters
+U_MAIL_DOMAINS=0
+U_MAIL_DKIM=0
+U_MAIL_ACCOUNTS=0
+U_MAIL_SSL=0
+SUSPENDED_MAIL=0
+U_DISK_MAIL=0
+
+# Starting loop
+for domain in $(search_objects 'mail' 'SUSPENDED' "*" 'DOMAIN'); do
+    rebuild_mail_domain_conf
+    if [ ! -z "$WEB_SYSTEM" ] || [ ! -z "$PROXY_SYSTEM" ]; then
+        if [ ! -z "$IMAP_SYSTEM" ]; then
+            $BIN/v-delete-sys-webmail $user $domain '' 'yes'
+            $BIN/v-add-sys-webmail $user $domain '' 'yes'
+        fi
+    fi
+done
+
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+# Updating counters
+update_user_value "$user" '$U_MAIL_DOMAINS' "$U_MAIL_DOMAINS"
+update_user_value "$user" '$U_MAIL_DKIM' "$U_MAIL_DKIM"
+update_user_value "$user" '$U_MAIL_ACCOUNTS' "$U_MAIL_ACCOUNTS"
+update_user_value "$user" '$U_MAIL_SSL' "$U_MAIL_SSL"
+update_user_value "$user" '$SUSPENDED_MAIL' "$SUSPENDED_MAIL"
+update_user_value "$user" '$U_DISK_MAIL' "$U_DISK_MAIL"
+
+# Update disk usage statistics
+$BIN/v-update-user-disk $user
+
+# Logging
+log_event "$OK" "$ARGUMENTS"
+
+exit

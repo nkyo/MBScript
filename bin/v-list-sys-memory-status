@@ -1,0 +1,43 @@
+#!/bin/bash
+# info: list virtual memory info
+# options: [FORMAT]
+# labels: panel
+#
+# example: v-list-sys-memory-status json
+#
+# The function lists virtual memory information
+
+
+#----------------------------------------------------------#
+#                    Variable&Function                     #
+#----------------------------------------------------------#
+
+# Argument definition
+#format=${1-shell}
+
+# Includes
+#source $HESTIA/func/main.sh
+
+
+#----------------------------------------------------------#
+#                       Action                             #
+#----------------------------------------------------------#
+
+# Displaying memory and swap usage
+free -t -m
+echo -en "\n-------------------------------------"
+echo -en  "-------------------------------------\n\n"
+
+# Displaying memory stats
+vmstat -S m -s
+echo -en "\n-------------------------------------"
+echo -en  "-------------------------------------\n\n"
+
+# Displaying ram information
+dmidecode -t 17 2>/dev/null
+
+#----------------------------------------------------------#
+#                       Hestia                             #
+#----------------------------------------------------------#
+
+exit

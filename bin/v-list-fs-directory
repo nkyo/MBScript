@@ -1,0 +1,47 @@
+#!/bin/bash
+# info: list directory
+# options: USER DIRECTORY
+# labels: 
+#
+# example: v-list-fs-directory /home/admin/web
+#
+# The function lists directory on the file system
+
+user=$1
+path=$2
+
+# Includes
+source $HESTIA/func/main.sh
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '1' "$#" 'USER [DIRECTORY]'
+is_format_valid 'user'
+is_object_valid 'user' 'USER' "$user"
+
+# Checking user homedir
+homedir=$(grep "^$user:" /etc/passwd | cut -f 6 -d :)
+if [ -z $homedir ]; then
+    echo "Error: user home directory doesn't exist"
+    exit 12
+fi
+
+# Checking path
+if [ ! -z "$path" ]; then
+    rpath=$(readlink -f "$path")
+    if [ -z "$(echo $rpath |grep $homedir)" ]; then
+    echo "Error: invalid path $dst_dir"
+        exit 2
+    fi
+else
+    path=$homedir
+fi
+
+# Listing directory
+user_exec find "$path" -maxdepth 1 \
+    -printf "%y|%m|%TY-%Tm-%Td|%TH:%TM|%u|%g|%s|%P\n" 2>/dev/null
+
+# Exiting
+exit $?

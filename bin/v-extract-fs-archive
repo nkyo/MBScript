@@ -1,0 +1,164 @@
+#!/bin/bash
+# info: archive to directory
+# options: USER ARCHIVE DIRECTORY [SELECTED_DIR] [STRIP] [TEST]
+# labels: 
+#
+# example: v-extract-fs-archive admin latest.tar.gz /home/admin
+#
+# The function extracts archive into directory on the file system
+
+user=$1
+src_file=$2
+dst_dir=$3
+selected_dir=$4
+strip=$5
+test=$6
+
+# Includes
+source $HESTIA/func/main.sh
+
+#----------------------------------------------------------#
+#                    Verifications                         #
+#----------------------------------------------------------#
+
+check_args '3' "$#" 'USER ARCHIVE DIRECTORY [SELECTED_DIR] [STRIP] [TEST]'
+is_format_valid 'user'
+is_object_valid 'user' 'USER' "$user"
+
+# Checking user homedir
+homedir=$(grep "^$user:" /etc/passwd | cut -f 6 -d :)
+if [ -z $homedir ]; then
+    echo "Error: user home directory doesn't exist"
+    exit 12
+fi
+
+# Checking source dir
+if [ ! -e "$src_file" ]; then
+    echo "Error: source file $src_file doesn't exist"
+    exit 3
+fi
+
+# Checking source path
+rpath=$(readlink -f "$src_file")
+if [ -z "$(echo $rpath |egrep "^/tmp|^$homedir|^$BACKUP/$user\.|^$BACKUP/tmp\.")" ]; then
+    echo "Error: invalid source path $src_file"
+    exit 2
+fi
+
+# Checking destination path
+rpath=$(readlink -f "$dst_dir")
+if [ -z "$(echo $rpath |egrep "^/tmp|^$homedir")" ]; then
+    echo "Error: invalid destination path $dst_dir"
+    exit 2
+fi
+
+if [ ! -z "$strip" ]; then
+    is_int_format_valid "$strip" 'strip-components'
+    tar_strip_level="--strip-components $strip"
+fi
+# Extracting gziped archive
+if [ ! -z "$(echo $src_file |egrep -i  '.tgz|.tar.gz')" ]; then
+    x='yes'
+    if [ -z "$test" ] || [ "$test" = "no" ]; then
+        user_exec mkdir -p "$dst_dir" >/dev/null 2>&1
+        user_exec tar -xzf "$src_file" -C "$dst_dir" --no-wildcards "$selected_dir" $tar_strip_level >/dev/null 2>&1
+        rc=$?
+    else
+        user_exec tar -tf "$src_file" --no-wildcards "$selected_dir" >/dev/null 2>&1
+        rc=$?
+    fi
+fi
+
+# Extracting bziped archive
+if [ ! -z "$(echo $src_file |egrep -i  '.tbz|.tar.bz')" ]; then
+    x='yes'
+    if [ -z "$test" ] || [ "$test" = "no" ]; then
+        user_exec mkdir -p "$dst_dir" >/dev/null 2>&1
+        user_exec tar -xjf "$src_file" -C "$dst_dir" --no-wildcards "$selected_dir" $tar_strip_level >/dev/null 2>&1
+        rc=$?
+    else
+        user_exec tar -tf "$src_file" --no-wildcards "$selected_dir" >/dev/null 2>&1
+        rc=$?
+    fi
+fi
+
+# Extracting ZSTD archive
+if [ ! -z "$(echo $src_file |egrep -i  '.tar.zst')" ]; then
+    x='yes'
+    if [ -z "$test" ] || [ "$test" = "no" ]; then
+        user_exec mkdir -p "$dst_dir" >/dev/null 2>&1
+        user_exec tar -I zstd -xf "$src_file" -C "$dst_dir" --no-wildcards "$selected_dir" $tar_strip_level >/dev/null 2>&1
+        rc=$?
+    else
+        user_exec tar -I zstd -tf "$src_file" --no-wildcards "$selected_dir" >/dev/null 2>&1
+        rc=$?
+    fi
+fi
+
+# Extracting gziped file
+if [ ! -z "$(echo $src_file |grep -i  '.zst')" ] && [ -z "$x" ]; then
+    user_exec mkdir -p "$dst_dir" >/dev/null 2>&1
+    user_exec mv "$src_file" "$dst_dir" >/dev/null 2>&1
+    user_exec zstd -d "$dst_dir/$(basename $src_file)" >/dev/null 2>&1
+    rc=$?
+fi
+
+# Extracting gziped file
+if [ ! -z "$(echo $src_file |grep -i  '.gz')" ] && [ -z "$x" ]; then
+    user_exec mkdir -p "$dst_dir" >/dev/null 2>&1
+    user_exec mv "$src_file" "$dst_dir" >/dev/null 2>&1
+    user_exec gzip -d "$dst_dir/$(basename $src_file)" >/dev/null 2>&1
+    rc=$?
+fi
+
+# Extracting bziped file
+if [ ! -z "$(echo $src_file |grep -i  '.bz')" ] && [ -z "$x" ]; then
+    user_exec mkdir -p "$dst_dir" >/dev/null 2>&1
+    user_exec mv "$src_file" "$dst_dir"# >/dev/null 2>&1
+    user_exec bzip2 -d "$dst_dir/$(basename $src_file)" >/dev/null 2>&1
+    rc=$?
+fi
+
+# Extracting ziped archive
+if [ ! -z "$(echo $src_file |grep -i  '.zip')" ]; then
+    user_exec mkdir -p "$dst_dir" >/dev/null 2>&1
+    user_exec unzip "$src_file" -d "$dst_dir" >/dev/null 2>&1
+    rc=$?
+fi
+
+# Extracting ziped archive
+if [ ! -z "$(echo $src_file |grep -i  '.7z')" ]; then
+    user_exec mkdir -p "$dst_dir" >/dev/null 2>&1
+    user_exec mv "$src_file" "$dst_dir" >/dev/null 2>&1
+    user_exec p7zip -d "$src_file" >/dev/null 2>&1
+    rc=$?
+fi
+
+# Extracting tared archive
+if [ ! -z "$(echo $src_file |grep -i '.tar')" ] && [ -z "$x" ]; then
+    x='yes'
+    if [ -z "$test" ] || [ "$test" = "no" ]; then
+        user_exec mkdir -p "$dst_dir" >/dev/null 2>&1
+        user_exec tar -xf "$src_file" -C "$dst_dir" --no-wildcards "$selected_dir" $tar_strip_level >/dev/null 2>&1
+        rc=$?
+    else
+        user_exec tar -tf "$src_file" --no-wildcards "$selected_dir" >/dev/null 2>&1
+        rc=$?
+    fi
+fi
+
+# Extracting rared archive
+if [ ! -z "$(echo $src_file |grep -i  '.rar')" ]; then
+    user_exec mkdir -p "$dst_dir" >/dev/null 2>&1
+    user_exec unrar "$src_file"  "$dst_dir" >/dev/null 2>&1
+    rc=$?
+fi
+
+# Checking result
+if [ $rc -ne 0 ]; then
+    echo "Error: $src_file was not extracted"
+    exit 3
+fi
+
+# Exiting
+exit
