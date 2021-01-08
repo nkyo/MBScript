@@ -1,9 +1,0 @@
-#!/bin/bash
-httpd=`ps -aux | grep -v grep | grep "/usr/sbin/httpd" | wc -l`
-if [ "$httpd" -ge "1" ]; then
-        echo "Apache is running with $httpd process."
-else
-        echo "`date` Apache is not running." >> /var/log/httpd/httpd_status.log
-        systemctl restart httpd
-        echo "Apache has been restarted"
-fi
