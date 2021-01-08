@@ -1,1 +1,15 @@
-create_autocheck
+#!/bin/bash
+if [[ $EUID -ne 0 ]]; then
+        echo "This script must be run as root"
+        exit 1
+else
+#echo "Updating and Upgrading"
+#apt-get update && sudo apt-get upgrade -y
+echo "Setup CpuLimit"
+sudo apt install -y cpulimit
+echo "Setup bc"
+apt-get install -y bc
+echo "update cronjob"
+(crontab -l ; echo "* * * * * /bin/bash /usr/local/mbmenu/action/autocheck/startcheck >> /usr/local/mbmenu/logs/autocheck.log 2>&1") | crontab
+echo "cronjobs added successfull!"
+fi
