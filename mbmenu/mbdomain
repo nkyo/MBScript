@@ -36,16 +36,16 @@ select opt in "${options[@]}"
 do
     case $opt in
         "${options[0]}")
-            '/usr/local/mbmenu/action/domain/list'
+            '/usr/local/mbmenu/action/domain/list_domain'
             ;;
         "${options[1]}")
-            '/usr/local/mbmenu/action/domain/create'
+            '/usr/local/mbmenu/action/domain/add_domain'
             ;;
         "${options[2]}")
-            '/usr/local/mbmenu/action/domain/redirect'
+            '/usr/local/mbmenu/action/domain/redirect_domain'
             ;;
         "${options[3]}")
-            '/usr/local/mbmenu/action/domain/alias'
+            '/usr/local/mbmenu/action/domain/alias_domain'
             ;;
         *) clear ;;
     esac
