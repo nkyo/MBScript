@@ -1,0 +1,68 @@
+#!/bin/bash
+#######################################################
+# MBScript main menu
+#######################################################
+. /usr/local/mbmenu/functions #goi chuc nang
+
+
+if [[ ! $1 ]]; then
+   clear
+fi
+echo "#    __  __       _   ____               _   _ ______ _______ #"
+echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
+echo "#   | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   #"
+echo "#   | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   #"
+echo "#   | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   #"
+echo "#   |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   #"
+echo ""
+echo "========================================================================="
+echo "                MBScript v$version - Cong cu quan ly VPS"
+echo "                      MBscript URL"
+echo "-------------------------------------------------------------------------"
+echo "Status: $status | Disk: ${use_disk}/${total_disk} GB | Ram: ${use_ram}/${total_ram} MB | Swap: ${use_swap}/${total_swap} MB"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: /documentation"
+echo "//---------------------------------------------------------------------//"
+clear
+options=(
+    "Danh sach - Domain/SubDomain"
+    "Them - Domain/SubDomain"
+    "Them - Redirect"
+    "Them - Alias"
+    "Phan quyen han (Chown/Chmod)"
+    "Xoa"
+    "Mo/Khoa"
+    "Phuc hoi Nginx"
+    )
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [0=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/usr/local/mbmenu/action/domain/list'
+            ;;
+        "${options[1]}")
+            '/usr/local/mbmenu/action/domain/create'
+            ;;
+        "${options[2]}")
+            '/usr/local/mbmenu/action/domain/redirect'
+            ;;
+        "${options[3]}")
+            '/usr/local/mbmenu/action/domain/alias'
+            ;;
+        "${options[4]}")
+            /usr/local/mbmenu/permission'
+            ;;
+        "${options[5]}")
+            '/usr/local/mbmenu/action/domain/delete'
+            ;;
+        "${options[6]}")
+            '/usr/local/mbmenu/action/domain/suspend'
+            ;;
+        "${options[7]}")
+            '/usr/local/mbmenu/action/domain/restore_nginx'
+            ;;
+        *) clear ;;
+    esac
+done
