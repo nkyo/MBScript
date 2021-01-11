@@ -35,9 +35,9 @@ mariadb="$(systemctl status mariadb.service | grep 'Active' | cut -f2 -d':' | xa
 if [[ "$nginx" != 'active' ]] || [[ "$phpfpm" != 'active' ]] || [[ "$mariadb" != 'active' ]]; then
 clear
 echo "-------------------------------------------------------------------------"
-echo "Co loi xay ra:"
+echo "Warning!!!"
 echo "-------------------------------------------------------------------------"
-echo "Vui long kiem tra các service truoc khi them ten mien:"
+echo "Kiem tra lai cac service dang hoat dong:"
 echo "/------------------------------------------------------------------------/"
 echo "Nginx: $nginx"
 echo "PHP-FPM: $phpfpm"
@@ -49,7 +49,7 @@ fi
     
 domain=$1
 if [ -z "$domain" ]; then
-read -p "Nhap domain hoac subdomain ban muon them 
+read -p "Nhap domain hoac subdomain can them vao 
    [0=Thoat]: " domain
 fi
 
