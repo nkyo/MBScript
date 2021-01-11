@@ -29,10 +29,6 @@ options=(
     "Them - Domain/SubDomain"
     "Them - Redirect"
     "Them - Alias"
-    "Phan quyen han (Chown/Chmod)"
-    "Xoa"
-    "Mo/Khoa"
-    "Phuc hoi Nginx"
     )
 PS3="
 -//- Nhap lua chon cua ban (1-${#options[@]}) [0=Thoat]: "
@@ -50,18 +46,6 @@ do
             ;;
         "${options[3]}")
             '/usr/local/mbmenu/action/domain/alias'
-            ;;
-        "${options[4]}")
-            /usr/local/mbmenu/permission'
-            ;;
-        "${options[5]}")
-            '/usr/local/mbmenu/action/domain/delete'
-            ;;
-        "${options[6]}")
-            '/usr/local/mbmenu/action/domain/suspend'
-            ;;
-        "${options[7]}")
-            '/usr/local/mbmenu/action/domain/restore_nginx'
             ;;
         *) clear ;;
     esac
