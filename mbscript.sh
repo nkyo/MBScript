@@ -67,3 +67,37 @@ fi
 echo "Dang tien hanh go cai dat Apache / Nginx va MySQL / MariaDB..."
 apt-get remove apache2 -y && apt-get remove nginx -y && apt-get remove mysqld mariadb -y
 echo "Go cai dat hoan tat, bat dau cai dat thu vien MBScript..."
+
+##----------------------------------Bat Dau Qua trinh cai dat MB SCript -------------------------------------##
+
+export PATH=$PATH:/sbin
+export DEBIAN_FRONTEND=noninteractive
+VERSION='ubuntu'
+MB='/usr/local/mbmenu'
+LOG="/usr/local/mbbackup/mbscript_install-$(date +%d%m%Y%H%M).log"
+memory=$(grep 'MemTotal' /proc/meminfo |tr ' ' '\n' |grep [0-9])
+mb_backups="/usr/local/mbbackup/mbscrip-$(date +%d%m%Y%H%M)"
+arch=$(uname -i)
+spinner="/-\|"
+os='ubuntu'
+release="$(lsb_release -s -r)"
+codename="$(lsb_release -s -c)"
+HESTIA_INSTALL_DIR="$MB/install/deb"
+VERBOSE='no'
+
+########################
+# Hỏi trước khi cài đặt#
+########################
+
+
+
+PHPSELECT=form-ask
+
+# Define software versions
+
+MB_INSTALL_VER='1.0.0'
+pma_v='5.0.4'
+php_v=("5.6" "7.0" "7.1" "7.2" "7.3" "7.4" "8.0")
+fpm_v="7.4"
+mariadb_v="10.5"
+
