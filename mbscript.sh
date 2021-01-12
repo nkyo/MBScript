@@ -73,17 +73,29 @@ echo "Go cai dat hoan tat, bat dau cai dat thu vien MBScript..."
 export PATH=$PATH:/sbin
 export DEBIAN_FRONTEND=noninteractive
 VERSION='ubuntu'
-MB='/usr/local/mbmenu'
-LOG="/usr/local/mbbackup/mbscript_install-$(date +%d%m%Y%H%M).log"
-memory=$(grep 'MemTotal' /proc/meminfo |tr ' ' '\n' |grep [0-9])
+MBMENU='/usr/local/mbmenu'
 mb_backups="/usr/local/mbbackup/mbscrip-$(date +%d%m%Y%H%M)"
+LOG="/usr/local/mbbackup/mbscript_install-$(date +%d%m%Y%H%M).log"
 arch=$(uname -i)
 spinner="/-\|"
 os='ubuntu'
 release="$(lsb_release -s -r)"
 codename="$(lsb_release -s -c)"
-HESTIA_INSTALL_DIR="$MB/install/deb"
 VERBOSE='no'
+echo "=========================================================================="
+echo "Mac dinh server se duoc cai dat PHP 7.4. Thay doi phien ban PHP bang chuc"
+echo "--------------------------------------------------------------------------"
+echo "nang [Doi phien ban PHP] trong [Update System (Apache,PHP...)] cua MBScript.  "
+echo "--------------------------------------------------------------------------"
+echo "PHP versions support: 7.3, 7.2, 7.1, 7.0, 5.6"
+echo "--------------------------------------------------------------------------"
+echo "MariaDB versions support: 10.5"
+cpuname=$( awk -F: '/model name/ {name=$2} END {print name}' /proc/cpuinfo )
+cpucores=$( awk -F: '/model name/ {core++} END {print core}' /proc/cpuinfo )
+cpufreq=$( awk -F: ' /cpu MHz/ {freq=$2} END {print freq}' /proc/cpuinfo )
+svram=$( free -m | awk 'NR==2 {print $2}' )
+svhdd=$( df -h | awk 'NR==2 {print $2}' )
+svswap=$( free -m | awk 'NR==3 {print $2}' )
 
 ########################
 # Hỏi trước khi cài đặt#
@@ -91,7 +103,53 @@ VERBOSE='no'
 
 
 
-PHPSELECT=form-ask
+
+
+
+
+
+
+echo "=========================================================================="
+echo "Thong Tin Server:  "
+echo "--------------------------------------------------------------------------"
+echo "Server Type: $(virt-what | awk 'NR==1 {print $NF}')"
+echo "CPU Type: $cpuname"
+echo "CPU Core: $cpucores"
+echo "CPU Speed: $cpufreq MHz"
+echo "Memory: $svram MB"
+echo "Disk: $svhdd"
+echo "IP: $svip"
+echo "=========================================================================="
+echo "Dien Thong Tin Cai Dat: "
+echo "--------------------------------------------------------------------------"
+echo -n "Nhap PhpMyAdmin Port [ENTER]: " 
+read svport
+if [ "$svport" = "443" ] || [ "$svport" = "3306" ] || [ "$svport" = "465" ] || [ "$svport" = "587" ]; then
+	svport="2313"
+echo "Phpmyadmin khong the trung voi port cua dich vu khac !"
+echo "--------------------------------------------------------------------------"
+echo "MBScript se dat phpmyadmin port la 2313"
+fi
+if [ "$svport" = "" ] ; then
+clear
+echo "=========================================================================="
+echo "$svport khong duoc de trong."
+echo "--------------------------------------------------------------------------"
+echo "Ban hay kiem tra lai !" 
+bash /etc/MBScript/.tmp/MBScript-setup
+exit
+fi
+if ! [[ $svport -ge 100 && $svport -le 65535  ]] ; then  
+clear
+echo "=========================================================================="
+echo "$svport khong hop le!"
+echo "--------------------------------------------------------------------------"
+echo "Port hop le la so tu nhien nam trong khoang (100 - 65535)."
+echo "--------------------------------------------------------------------------"
+echo "Ban hay kiem tra lai !" 
+echo "-------------------------------------------------------------------------"
+read -p "Nhan [Enter] de tiep tuc ..."
+clear
 
 # Define software versions
 
