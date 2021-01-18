@@ -19,7 +19,7 @@ echo "Huong dan: /documentation"
 echo "//---------------------------------------------------------------------//"
 echo
 echo "--//---------------------------------------------------------------------"
-echo "- 4. Quan ly Domain > Kiem tra trang thai service Apache"
+echo "- 1. Quan ly Domain > Kiem tra trang thai service Apache"
 echo "/-----------------------------------------------------------------------/"
 echo ""
 
