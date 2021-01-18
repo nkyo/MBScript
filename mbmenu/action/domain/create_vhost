@@ -1,0 +1,61 @@
+#!/bin/bash
+clear
+echo "#    __  __       _   ____               _   _ ______ _______ #"
+echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
+echo "#   | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   #"
+echo "#   | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   #"
+echo "#   | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   #"
+echo "#   |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   #"
+echo ""
+echo "========================================================================="
+echo "                MBScript v$version - Cong cu quan ly VPS"
+echo "                      MBscript URL"
+echo "-------------------------------------------------------------------------"
+echo "Status: $status | Disk: ${use_disk}/${total_disk} GB | Ram: ${use_ram}/${total_ram} MB | Swap: ${use_swap}/${total_swap} MB"
+echo "-------------------------------------------------------------------------"
+echo "- 1. Quan ly Domain : $(apache2 -v | cut -f3 -d' ' | head -1) - $(systemctl status apache2.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "-----------------------------------------------------------------------"
+echo "Huong dan: /documentation"
+echo
+echo "--//---------------------------------------------------------------------"
+echo "- 1. Quan ly Domain > Them ten mien moi"
+echo "/-----------------------------------------------------------------------/"
+echo ""
+
+domain=$1
+if [ -z "$domain" ]; then
+read -p "Nhap domain hoac subdomain moi (vi du: matbao.net, wiki.matbao.net) [5=Quay lai]: " domain
+fi
+
+if [ "$domain" = "5" ];
+then
+echo "Quay lai menu chinh..."
+sleep 5
+/usr/local/mbmenu/mbdomain
+fi
+
+if [ "$domain" = '' ];
+then
+echo "Vui long nhap ten mien."
+sleep 5
+/usr/local/mbmenu/action/domain/create_vhost
+fi
+
+if [ "$domain" = '${domain/.}' ];
+then
+echo "Ten mien da nhap chua dung, vui long nhap lai!!!"
+sleep 8
+/usr/local/mbmenu/action/domain/create_vhost
+fi
+
+
+dir="/etc/apache2/mbwww.d.conf/.$domain.conf"
+if [[ -f "$dir" ]];
+then
+echo "Ten mien da ton tai tren may chu, vui long nhap lai!!"
+sleep 10
+/usr/local/mbmenu/action/domain/create_vhost
+fi
+
+. /usr/local/mbmenu/action/domain/add_vhost $domain
+
