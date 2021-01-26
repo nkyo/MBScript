@@ -31,7 +31,8 @@ options=(
     "Thay doi Password User" #1
     "Xoa Database" #2
     "Danh sach Database" #3
-    "Quay lai" #4
+    "Kiem tra trang thai" #4
+    "Quay lai" #6
 )
 PS3="
 -//- Nhap lua chon cua ban (1-${#options[@]}) [Ctrl+C=Thoat]: "
@@ -51,9 +52,12 @@ do
             '/usr/local/mbmenu/action/database/list_database'
             ;;
         "${options[4]}")
+            '/usr/local/mbmenu/action/database/check_statusdb'
+            ;;
+        "${options[5]}")
         '/usr/local/bin/mb'
         ;;
         *) exit 1;;
     esac
 done
-                                        
+

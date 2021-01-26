@@ -10,18 +10,18 @@ cat > "/etc/apache2/mbwww.d.conf/$domain.conf" <<END
     #errorDocument 404 /404.html
     ErrorLog "/mbwww/$domain/logs/$domain-error_log"
     CustomLog "/mbwww/$domain/logs/$domain-access_log" combined
-
+    
     #DENY FILES
      <Files ~ (\.user.ini|\.htaccess|\.git|\.svn|\.project|LICENSE|README.md)$>
        Order allow,deny
        Deny from all
     </Files>
-
+    
     #PHP
     #<FilesMatch \.php$>
             #SetHandler "proxy:unix:/tmp/php-cgi-56.sock|fcgi://localhost"
     #</FilesMatch>
-
+    
     #PATH
     <Directory "/mbwww/$domain/httpdocs">
         SetOutputFilter DEFLATE

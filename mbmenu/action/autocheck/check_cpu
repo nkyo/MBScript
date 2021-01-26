@@ -1,5 +1,5 @@
 #!/bin/bash
-CPU_USAGE=$(uptime | cut -d"," -f4 | cut -d":" -f2 | cut -d" " -f2 | sed -e "s/\0.//g")
+CPU_USAGE=$(uptime | cut -d"," -f4 | cut -d":" -f2 | cut -d" " -f2 | sed -e "s/\.//g")
 CPU_USAGE_THRESHOLD=75
 CPU_LIMIT=80
 if [ $CPU_USAGE -gt $CPU_USAGE_THRESHOLD ] ; then
@@ -16,3 +16,4 @@ if [ $CPU_USAGE -gt $CPU_USAGE_THRESHOLD ] ; then
 else
   exit 0
 fi
+

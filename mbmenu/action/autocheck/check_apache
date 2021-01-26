@@ -1,0 +1,8 @@
+
+#!/bin/bash
+up=$(systemctl status apache2.service |grep 'Active: inactive' | wc -l)
+if [ $up -gt 0 ]; then
+   systemctl restart apache2.service
+   echo "Apache stop"
+fi
+

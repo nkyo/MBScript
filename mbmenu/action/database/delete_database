@@ -13,13 +13,14 @@ read -p "Nhap ten database can xóa: " database
 read -p "Xac nhan xoa dabase? (y/n): " confirm
 
 if [ "$database" = "" ]; then
- echo "Ban can nhap database can xoa"
+ echo "Ban can nhap database can xoa" 
  exit 0
 fi
 
 if [[ "$confirm" = "y" ]]; then
-        echo "Dang tien hanh xoa database..."
-        sleep 1
+	echo "Dang tien hanh xoa database..."
+	sleep 1
     mysql -u root -p"$db_admin_password" -e "DROP DATABASE $database"
     echo "Da xoa database thanh cong"
 fi
+

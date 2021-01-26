@@ -14,7 +14,7 @@ if [ "$database" = "" ] || [ "$username" = "" ] || [ "$password" = "" ]; then
 fi
 
 if [[ "$confirm" = "y" ]]; then
-        echo "Dang tien hanh them database moi..."
+	echo "Dang tien hanh them database moi..."
     # mysql -u admin -p"$db_admin_password" -e "show DATABASEs"
     db_admin_password=$(cat /usr/local/mbmenu/data/.my.cnf)
     mysql -u root -p"$db_admin_password" -e "CREATE DATABASE IF NOT EXISTS $database"

@@ -1,0 +1,36 @@
+#!/bin/bash
+domain=$1
+dirdefaultfile="/usr/local/mbmenu/action/domain/default.html"
+docroot="/mbwww/$domain"
+listdomain="/usr/local/mbmenu/action/domain/listdomain"
+
+mkdir -p $docroot/httpdocs
+mkdir -p $docroot/ftp
+mkdir -p $docroot/logs
+mkdir -p $docroot/ssl
+mkdir -p $docroot/tmp
+mkdir -p $docroot/session
+mkdir -p $docroot/backup
+
+chmod 755 /mbwww/$domain
+chmod 755 $docroot/httpdocs
+chmod 750 $docroot/ftp
+chmod 700 $docroot/logs
+chmod 700 $docroot/ssl
+chmod 700 $docroot/tmp
+chmod 700 $docroot/session
+chmod 700 $docroot/backup
+
+cp $dirdefaultfile $docroot/httpdocs
+
+#add vhost
+. /usr/local/mbmenu/action/domain/tem_vhost $domain
+echo "$domain" >> "$listdomain"
+
+/etc/init.d/apache2 restart >/dev/null 2>&1
+
+echo "Them ten mien $domain thanh cong!!!"
+echo "Quay ve menu chinh..."
+sleep 5
+clear
+/usr/local/mbmenu/mbdomain

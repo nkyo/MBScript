@@ -1,11 +1,11 @@
 #!/bin/bash
-MEM_THRESHOLD=80 #percent
+MEM_THRESHOLD=90 #percent
 MEM_TOTAL=$(free | grep "Mem:" | awk '{print $2}')
 MEM_REMAINIG=$(free | grep "Mem:" | awk '{print $4}')
 MEM_CURRENT=$(echo "scale=0;100-$MEM_REMAINIG*100/$MEM_TOTAL" | bc -l)
 if [ $MEM_CURRENT -gt $MEM_THRESHOLD ] ; then
   PIDMEM=$(ps -eo pid -eo %mem | sort -k 2 -r | grep -v %MEM | head -n 1 | awk '{print $1}')
-  KILL -9  $PIDMEM
+  KILL -9  $PIDMEM 
 else
   exit 0
 fi

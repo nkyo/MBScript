@@ -19,7 +19,7 @@ echo "Huong dan: /documentation"
 echo "//---------------------------------------------------------------------//"
 echo
 echo "--//---------------------------------------------------------------------"
-echo "- 1. Quan ly Domain > Kiem tra trang thai service Apache"
+echo "- 4. Quan ly Domain > Kiem tra trang thai service Apache"
 echo "/-----------------------------------------------------------------------/"
 echo ""
 
@@ -28,9 +28,9 @@ service=apache2
 if pid=$(pgrep $service);
 then
         echo "Service Apache dang hoat dong PID =" $pid | awk -F"/" '{ print $1 }'
-        echo "Quay lai menu chinh..."
-        sleep 10
-        /usr/local/mbmenu/mbdomain
+	echo "Quay lai menu chinh..."
+	sleep 10
+	/usr/local/mbmenu/mbdomain
 
 else
         echo "Service Apache khong hoat dong, in ra log loi..."
@@ -40,14 +40,14 @@ else
                                 if [ $answer = "y" -o $answer = "Y" ];
                                 then
                                         echo "Khoi dong lai dich vu..."
-                                        /etc/init.d/apache2 restart >/dev/null 2>&1
+                                        /etc/init.d/apache2 restart >/dev/null 2>&1 
                                         echo "Khoi dong lai hoan tat, vui long kiem tra lai dich vu."
-                                        sleep 5
-                                        /usr/local/mbmenu/mbdomain
+					sleep 5
+					/usr/local/mbmenu/mbdomain
                                 else
                                         echo "Quay lai menu chinh"
-                                        sleep 3
-                                        /usr/local/mbmenu/mbdomain
+					sleep 3
+					/usr/local/mbmenu/mbdomain
 fi
 fi
 

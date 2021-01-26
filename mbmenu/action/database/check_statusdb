@@ -1,0 +1,32 @@
+#!/bin/bash
+echo "--//---------------------------------------------------------------------"
+echo "- 5. Quan ly database > Kiem tra trang thai service Database"
+echo "/-----------------------------------------------------------------------/"
+echo ""
+
+service=mariadb
+
+if pid=$(pgrep $service);
+then
+        echo "Service MariaDB dang hoat dong PID =" $pid | awk -F"/" '{ print $1 }'
+        echo "Quay lai menu chinh..."
+        sleep 10
+        /usr/local/mbmenu/mbdatabase
+
+else
+        echo "Service MariaDB khong hoat dong, in ra log loi..."
+        tail /var/log/mariadb/error.log
+        echo "Ban muon restart dich vu khong? Y/n ?"
+                        read answer
+                                if [ $answer = "y" -o $answer = "Y" ];
+                                then
+                                        echo "Khoi dong lai dich vu..."
+                                        /etc/init.d/mariadb restart
+                                        echo "Khoi dong lai hoan tat, vui long kiem tra lai dich vu."
+                                else
+                                        echo "Quay lai menu chinh"
+                                        sleep 3
+                                        clear
+                                        /usr/local/mbmenu/mbdatabase
+fi
+
