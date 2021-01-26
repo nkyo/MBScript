@@ -49,7 +49,7 @@ sleep 8
 fi
 
 
-dir="/etc/apache2/mbwww.d.conf/.$domain.conf"
+dir="/etc/apache2/mbwww.d.conf/$domain.conf"
 if [[ -f "$dir" ]];
 then
 echo "Ten mien da ton tai tren may chu, vui long nhap lai!!"
