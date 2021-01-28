@@ -4,6 +4,7 @@ dirdefaultfile="/usr/local/mbmenu/action/domain/default.html"
 docroot="/mbwww/$domain"
 listdomain="/usr/local/mbmenu/action/domain/listdomain"
 
+
 mkdir -p $docroot/httpdocs
 mkdir -p $docroot/ftp
 mkdir -p $docroot/logs
@@ -21,7 +22,10 @@ chmod 700 $docroot/tmp
 chmod 700 $docroot/session
 chmod 700 $docroot/backup
 
+
 cp $dirdefaultfile $docroot/httpdocs
+
+openssl req -nodes -x509 -newkey rsa:2048 -keyout $docroot/ssl/$domain.key -out $docroot/ssl/$domain.crt -subj "/C=VN/ST=$domain/L=$domain/O=$domain/OU=root/CN=`$domain -f`/emailAddress=admin@$domain" >/dev/null 2>&1
 
 #add vhost
 . /usr/local/mbmenu/action/domain/tem_vhost $domain
