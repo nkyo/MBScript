@@ -1,0 +1,7 @@
+
+#!/bin/bash
+up=$(systemctl status mariadb.service |grep 'Active: inactive' | wc -l)
+if [ $up -gt 0 ]; then
+   systemctl restart mariadb.service
+   echo "Mariadb stop"
+fi

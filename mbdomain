@@ -1,4 +1,13 @@
 #!/bin/bash
+#######################################################
+# MBScript main menu
+#######################################################
+. /usr/local/mbmenu/functions #goi chuc nang
+
+if [[ ! $1 ]]; then
+   clear
+fi
+
 clear
 echo "#    __  __       _   ____               _   _ ______ _______ #"
 echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
@@ -18,36 +27,34 @@ echo "-----------------------------------------------------------------------"
 echo "Huong dan: /documentation"
 echo "//---------------------------------------------------------------------//"
 echo
-echo "--//---------------------------------------------------------------------"
-echo "- 4. Quan ly Domain > Kiem tra trang thai service Apache"
-echo "/-----------------------------------------------------------------------/"
-echo ""
-
-service=apache2
-
-if pid=$(pgrep $service);
-then
-        echo "Service Apache dang hoat dong PID =" $pid | awk -F"/" '{ print $1 }'
-	echo "Quay lai menu chinh..."
-	sleep 5
-	/usr/local/mbmenu/mbdomain
-
-else
-        echo "Service Apache khong hoat dong, in ra log loi..."
-        tail /var/log/apache2/error.log
-        echo "Ban muon restart dich vu khong? Y/n ?"
-                        read answer
-                                if [ $answer = "y" -o $answer = "Y" ];
-                                then
-                                        echo "Khoi dong lai dich vu..."
-                                        /etc/init.d/apache2 restart >/dev/null 2>&1 
-                                        echo "Khoi dong lai hoan tat, vui long kiem tra lai dich vu."
-					sleep 5
-					/usr/local/mbmenu/mbdomain
-                                else
-                                        echo "Quay lai menu chinh"
-					sleep 3
-					/usr/local/mbmenu/mbdomain
-fi
-fi
+options=(
+    "Them ten mien moi" #0
+    "Xoa ten mien" #1
+    "Danh sach website" #2
+    "Kiem tra trang thai" #3
+    "Quay lai" #4
+)
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [Ctrl+C=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/usr/local/mbmenu/action/domain/create_vhost'
+            ;;
+        "${options[1]}")
+            '/usr/local/mbmenu/action/domain/del_vhost'
+            ;;
+        "${options[2]}")
+            '/usr/local/mbmenu/action/domain/list_vhost'
+            ;;
+        "${options[3]}")
+            '/usr/local/mbmenu/action/domain/check_statusapache'
+            ;;
+        "${options[4]}")
+        '/usr/local/bin/mb'
+        ;;
+        *) exit 1;;
+    esac
+done
 

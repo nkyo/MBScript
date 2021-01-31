@@ -1,0 +1,28 @@
+#!/bin/bash
+domain=$1
+docroot="/home/admin/domains/$domain"
+listdomain="/usr/local/mbmenu/action/domain/listdomain"
+listftp="/usr/local/mbmenu/action/ftp/listftp"
+
+gen_user() {
+    head /dev/urandom | tr -dc 0-9 | head -c 4
+}
+user=$domain | cut -f1 -d"."
+userftp=$user_$gen_user
+gen_pass() {
+    head /dev/urandom | tr -dc a-z0-9 | head -c 14
+}
+ftppasswd=$(gen_pass)
+
+echo $ftppasswd | ftpasswd --stdin --passwd --name=$userftp --gid=33 --uid=33 --home=/home/admin/domains/$domain/ --shell=/bin/false
+
+echo "Them ten mien $domain thanh cong!!!"
+
+echo "Quay ve menu chinh..."
+echo $userftp 
+echo $ftppasswd
+sleep 10
+clear
+echo $userftp 
+echo $ftppasswd
+/usr/local/mbmenu/mbftp

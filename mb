@@ -25,14 +25,14 @@ echo "Huong dan: /documentation"
 echo "//---------------------------------------------------------------------//"
 echo
 options=(
-    "Quan ly Domain" #0
+    "Quan ly Ten mien" #0
     "Quan ly SSL" #1
     "Quan ly SSH/SFTP" #2
     "Quan ly FTP Accounts" #3
     "Quan ly Database" #4
     "Quan ly PHP" #5
     "Quan ly Apache" #6
-    "Thiet Lap Backup" #7
+    "Thiet lap Backup" #7
     "Thiet lap AutoCheck" #8
 )
 PS3="
@@ -64,9 +64,10 @@ do
 	"${options[7]}")
             '/usr/local/mbmenu/mbbackup'
             ;;
-	 "${options[8]}")
-            '/usr/local/mbmenu/mbautocheck'
-            ;;
+	"${options[8]}")
+	 '/usr/local/mbmenu/mbautocheck'
+	 ;;
         *) exit 1;;
     esac
 done
+#"Thiet lap AutoCheck" #8
