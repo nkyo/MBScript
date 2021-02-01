@@ -1,8 +1,7 @@
 # MBScript
 VPS Panel via command line.
 
-wget -O - https://script.mbserver.xyz/install.sh | bash
-
+wget https://script.mbserver.xyz/install.sh && bash install.sh
 
 Tất cả sẽ được viết và cài đặt trên Ubuntu. Các phiên bản PHP MARIADB và Apache mới nhất.
 <br />
