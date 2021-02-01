@@ -23,7 +23,11 @@ do
                         mv $docsslpaid/${domain}.key $doroot/ssl/${domain}.key
 
                         systemctl restart apache2.service
-        echo "$domain" >> "$listsslpaid"
+                        
+                        if ! grep -R "$domain" $listsslpaid > /dev/null 2>&1
+                         then
+                         echo "$domain" >> "$listsslpaid"
+                         fi
             ;;
                 "${options[1]}")
             '/usr/local/bin/mb'
