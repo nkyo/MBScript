@@ -1,0 +1,74 @@
+#!/bin/bash
+#######################################################
+# MBScript main menu
+#######################################################
+clear
+echo "#    __  __       _   ____               _   _ ______ _______ #"
+echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
+echo "#   | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   #"
+echo "#   | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   #"
+echo "#   | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   #"
+echo "#   |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   #"
+echo ""
+echo "========================================================================="
+echo "                MBScript v$version - Cong cu quan ly VPS"
+echo "                      MBscript URL"
+echo "-------------------------------------------------------------------------"
+echo "Status: $status | Disk: ${use_disk}/${total_disk} GB | Ram: ${use_ram}/${total_ram} MB | Swap: ${use_swap}/${total_swap} MB"
+echo "-------------------------------------------------------------------------"
+echo "- Quan ly SSL  : $(apache2 -v | cut -f3 -d' ' | head -1) - $(systemctl status apache2.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "-----------------------------------------------------------------------"
+echo "Huong dan: /documentation"
+echo "//---------------------------------------------------------------------//"
+echo
+echo "- 1. Quan ly SSL > Free SSL"
+echo "/-----------------------------------------------------------------------/"
+echo ""
+
+domain=$1
+listdomain="/usr/local/mbmenu/action/domain/listdomain"
+if [ -z "$domain" ]; then
+read -p "Nhap domain hoac subdomain can kich hoat ssl (vi du: matbao.net, wiki.matbao.net) [5=Quay lai]: " domain
+fi
+
+if [ "$domain" = "5" ];
+then
+echo "Quay lai menu chinh..."
+sleep 3
+/usr/local/mbmenu/mbssl
+fi
+
+if [ "$domain" = '' ];
+then
+echo "Vui long nhap ten mien."
+sleep 3
+/usr/local/mbmenu/action/ssl/free_ssl
+fi
+
+if [ "$domain" = '${domain/.}' ];
+then
+echo "Ten mien da nhap chua dung, vui long nhap lai!!!"
+sleep 3
+/usr/local/mbmenu/action/ssl/free_ssl
+fi
+
+if ! grep -R "$domain" $listdomain > /dev/null 2>&1
+then
+echo "Ten mien chua ton tai tren he thong nen khong the cai dat SSL!!"
+sleep 3
+/usr/local/mbmenu/action/ssl/free_ssl
+fi
+
+if [[ -f /root/.acme.sh/$domain/fullchain.cer ]]; then
+read -p "Domain da duoc cai dat ssl mien phi truoc do, ban muon renew (y/n) ?" confirm
+if [[ "$confirm" = "y" ]]; then
+clear
+. /usr/local/mbmenu/action/ssl/ssl_let $domain
+fi
+if [[ "$confirm" = "n" ]]; then
+clear
+/usr/local/mbmenu/action/ssl/free_ssl
+fi
+fi
+
+. /usr/local/mbmenu/action/ssl/ssl_let $domain
