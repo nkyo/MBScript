@@ -5,22 +5,22 @@ listdomain="/usr/local/mbmenu/action/domain/listdomain"
 listftp="/usr/local/mbmenu/action/ftp/listftp"
 
 gen_user() {
-    head /dev/urandom | tr -dc 0-9 | head -c 4
+    head /dev/urandom | tr -dc 0-9 | head -c 5
 }
-user=$domain | cut -f1 -d"."
-userftp=$user_$gen_user
+usergen=$(gen_user)
+user=$(echo "$domain" | cut -f1 -d".")
+userftp=$(echo "$user"_"$usergen")
 gen_pass() {
     head /dev/urandom | tr -dc a-z0-9 | head -c 14
 }
-ftppasswd=$(gen_pass)
+passwd=$(gen_pass)
+cd /etc/proftpd
+echo $passwd | ftpasswd --stdin --passwd --name=$userftp --gid=33 --uid=33 --home=/home/admin/domains/$domain/ --shell=/bin/false
 
-echo $ftppasswd | ftpasswd --stdin --passwd --name=$userftp --gid=33 --uid=33 --home=/home/admin/domains/$domain/ --shell=/bin/false
-
-echo "Them ten mien $domain thanh cong!!!"
-
+echo "Them FTP account cho ten mien $domain thanh cong!!!"
+echo 
 echo "Quay ve menu chinh..."
-echo $userftp 
-echo $ftppasswd
+
 sleep 10
 clear
 echo $userftp 
