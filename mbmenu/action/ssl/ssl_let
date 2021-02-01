@@ -15,8 +15,11 @@ mv -S $docssl/${domain}.cer $docroot/ssl/${domain}.crt
 mv -S $docssl/${domain}.key $docroot/ssl/${domain}.key
 
 systemctl restart apache2.service
-
-echo "$domain" >> "$listssllet"
+    
+    if ! grep -R "$domain" $listssllet > /dev/null 2>&1
+                         then
+              echo "$domain" >> "$listssllet"
+    fi
 
 echo "Kich hoat SSL mien phi cho $domain thanh cong!!!"
 echo "Quay ve menu chinh..."
