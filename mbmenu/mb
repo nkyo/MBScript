@@ -3,7 +3,10 @@
 # MBScript main menu
 #######################################################
 . /usr/local/mbmenu/functions #goi chuc nang
-
+export LANGUAGE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LC_TYPE=en_US.UTF-8
 
 if [[ ! $1 ]]; then
    clear
@@ -16,27 +19,26 @@ echo "#   | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   #"
 echo "#   |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   #"
 echo ""
 echo "========================================================================="
-echo "                MBScript v$version - Cong cu quan ly VPS"
-echo "                      MBscript URL"
+echo "                MBScript v$version - Công cụ Quản lý máy chủ"
 echo "-------------------------------------------------------------------------"
-echo "Status: $status | Disk: ${use_disk}/${total_disk} GB | Ram: ${use_ram}/${total_ram} MB | Swap: ${use_swap}/${total_swap} MB"
+echo "Trạng thái: $status | Disk: ${use_disk}/${total_disk} GB | Ram: ${use_ram}/${total_ram} MB | CPU: $cpu
 echo "-------------------------------------------------------------------------"
-echo "Huong dan: /documentation"
+echo "Hướng dẫn: /documentation"
 echo "//---------------------------------------------------------------------//"
 echo
 options=(
-    "Quan ly Ten mien" #0
-    "Quan ly SSL" #1
-    "Quan ly SSH/SFTP" #2
-    "Quan ly FTP Accounts" #3
-    "Quan ly Database" #4
-    "Quan ly PHP" #5
-    "Quan ly Apache" #6
-    "Thiet lap Backup" #7
-    "Thiet lap AutoCheck" #8
+    "Quản lý tên miền" #0
+    "Quản lý  SSL" #1
+    "Quản lý  SSH/SFTP" #2
+    "Quản lý  FTP Accounts" #3
+    "Quản lý  Database" #4
+    "Quản lý  PHP" #5
+    "Quản lý  Apache" #6
+    "Thiết lập Backup" #7
+    "Thiết lập AutoCheck" #8
 )
 PS3="
--//- Nhap lua chon cua ban (1-${#options[@]}) [Ctrl+C=Thoat]: "
+-//- Nhập lựa chọn của bạn (1-${#options[@]}) [Ctrl+C=Thoát]: "
 select opt in "${options[@]}"
 do
     case $opt in
@@ -70,4 +72,3 @@ do
         *) exit 1;;
     esac
 done
-#"Thiet lap AutoCheck" #8
