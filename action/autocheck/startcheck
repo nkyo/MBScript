@@ -1,5 +1,0 @@
-#!/bin/bash
-path_script=/usr/local/mbmenu/action/autocheck
-sh $path_script/check_mariadb
-sh $path_script/check_cpu
-sh $path_script/check_apache
