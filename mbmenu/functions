@@ -1,11 +1,14 @@
 #!/bin/bash
-
-status="Error"
-apache2="$(systemctl status apache2.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
-phpfpm="$(systemctl status php-fpm.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
-mariadb="$(systemctl status mariadb.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
-if [[ "$apache2" = 'active' ]] || [[ "$phpfpm" = 'active' ]] || [[ "$mariadb" = 'active' ]]; then
-status="OK"
+export LANGUAGE=en_US.UTF-8
+export LC_ALL=en_US.UTF-8
+export LANG=en_US.UTF-8
+export LC_TYPE=en_US.UTF-8
+status="Lỗi"
+apache2="$(systemctl status apache2.service | grep 'Hoạt động' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+phpfpm="$(systemctl status php-fpm.service | grep 'Hoạt động' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+mariadb="$(systemctl status mariadb.service | grep 'Hoạt động' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+if [[ "$apache2" = 'active' ]] || [[ "$phpfpm" = 'Hoạt động' ]] || [[ "$mariadb" = 'active' ]]; then
+status="Ổn định"
 fi
 
 version="1.0.0"
