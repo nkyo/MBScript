@@ -1,0 +1,82 @@
+#!/bin/bash
+chon_php () {
+echo "Vui lòng chọn phiên bản PHP-FPM (5.6 -> 7.4)"
+echo "1. PHP-FPM 5.6"
+echo "2. PHP-FPM 7.0"
+echo "3. PHP-FPM 7.1"
+echo "4. PHP-FPM 7.2"
+echo "5. PHP-FPM 7.3"
+echo "6. PHP-FPM 7.4"
+echo "Vui lòng nhập lựa chọn (1-6):"
+read chonphp
+if [ $chonphp -eq 1 ]
+then
+     php_version=php5.6-fpm
+elif [ $chonphp -eq 2 ]
+then
+     php_version=php7.0-fpm
+elif [ $chonphp -eq 3 ]
+then
+     php_version=php7.1-fpm
+elif [ $chonphp -eq 4 ]
+then
+     php_version=php7.2-fpm
+elif [ $chonphp -eq 5 ]
+then
+        php_version=php7.3-fpm
+elif [ $chonphp -eq 6 ]
+then
+     php_version=php7.4-fpm
+else
+        clear
+     echo "Lựa chọn của bạn không hợp lệ"
+     echo "Vui lòng thử lại"
+chon_php
+fi
+     }
+clear
+
+echo "      __  __       _   ____               _   _ ______ _______ "
+echo "     |  \/  |     | | |  _ \             | \ | |  ____|__   __|"
+echo "     | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   "
+echo "     | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   "
+echo "     | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   "
+echo "     |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   "
+echo ""
+echo "========================================================================="
+echo "1. Quản lý tên miền > Thêm tên miền mới"
+echo "-------------------------------------------------------------------------"
+echo ""
+
+domain=$1
+php_version=$2
+if [ -z "$domain" ]; then
+read -p "Nhập tên miền bạn muốn thêm (ví dụ: matbao.net, wiki.matbao.net) [5=Quay lại]: " domain
+fi
+if [ "$domain" = "5" ];
+then
+echo "Quay lai menu chinh..."
+sleep 5
+/usr/local/mbmenu/mbdomain
+fi
+if [ "$domain" = '' ];
+then
+echo "Vui lòng nhập tên miền."
+sleep 5
+/usr/local/mbmenu/bin/domain/create_vhost
+fi
+if [ "$domain" = '${domain/.}' ];
+then
+echo "Tên miền bạn nhập không đúng, vui lòng thử lại!!!"
+sleep 3
+/usr/local/mbmenu/bin/domain/create_vhost
+fi
+dir="/home/admin/conf/$domain.conf"
+if [[ -f "$dir" ]];
+then
+echo "Tên miền này đã tồn tại trên hệ thống, vui lòng thử lại!!"
+sleep 3
+/usr/local/mbmenu/bin/domain/create_vhost
+fi
+chon_php
+. /usr/local/mbmenu/bin/domain/add_vhost $domain $php_version

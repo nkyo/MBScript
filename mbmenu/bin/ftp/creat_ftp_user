@@ -1,0 +1,31 @@
+#!/bin/bash
+user=$1
+passwd=$2
+docroot="/home/admin/domains/$domain"
+listftp="/usr/local/mbmenu/bin/ftp/listftp"
+
+gen_user() {
+    head /dev/urandom | tr -dc 0-9 | head -c 4
+}
+userftp=$user_$gen_user
+echo $passwd | ftpasswd --stdin --passwd --name=$userftp --gid=60 --uid=60 --home=/home/admin/domains/ --shell=/bin/false --file=/etc/proftpd/ftpd.passwd
+. /usr/local/mbmenu/bin/functions
+echo "#    __  __       _   ____               _   _ ______ _______ #"
+echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
+echo "#   | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   #"
+echo "#   | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   #"
+echo "#   | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   #"
+echo "#   |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   #"
+echo ""
+echo "========================================================================="
+echo "4. Quản lý FTP > Thêm tài khoản FTP"
+echo "-------------------------------------------------------------------------"
+echo ""
+echo "Tạo User FTP $user thành công!!!"
+echo "---------------------------------"
+echo "Tên User: $userftp"
+echo "Mật khẩu: $passwd"
+echo "---------------------------------"
+echo $userftp >> $listftp
+read -n 1 -s -r -p "Ấn phím bất kì để quay lại menu - [CTRL+C] để thoát" $back
+/usr/local/mbmenu/mbftp

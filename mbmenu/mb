@@ -2,43 +2,35 @@
 #######################################################
 # MBScript main menu
 #######################################################
-. /usr/local/mbmenu/functions #goi chuc nang
-export LANGUAGE=en_US.UTF-8
-export LC_ALL=en_US.UTF-8
-export LANG=en_US.UTF-8
-export LC_TYPE=en_US.UTF-8
-
+. /usr/local/mbmenu/functions
 if [[ ! $1 ]]; then
    clear
 fi
-echo "#    __  __       _   ____               _   _ ______ _______ #"
-echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
-echo "#   | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   #"
-echo "#   | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   #"
-echo "#   | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   #"
-echo "#   |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   #"
+echo "      __  __       _   ____               _   _ ______ _______ "
+echo "     |  \/  |     | | |  _ \             | \ | |  ____|__   __|"
+echo "     | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   "
+echo "     | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   "
+echo "     | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   "
+echo "     |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   "
 echo ""
 echo "========================================================================="
 echo "                MBScript v$version - Công cụ Quản lý máy chủ"
 echo "-------------------------------------------------------------------------"
-echo "Trạng thái: $status | Disk: ${use_disk}/${total_disk} GB | Ram: ${use_ram}/${total_ram} MB | CPU: $cpu
+echo "Disk: ${use_disk}/${total_disk} GB | FreeInodes: ${free_inode} | Ram: ${use_ram}/${total_ram} MB | LoadAvg(5m): $loadavg "
 echo "-------------------------------------------------------------------------"
 echo "Hướng dẫn: /documentation"
-echo "//---------------------------------------------------------------------//"
+echo "-------------------------------------------------------------------------"
 echo
 options=(
-    "Quản lý tên miền" #0
-    "Quản lý  SSL" #1
-    "Quản lý  SSH/SFTP" #2
-    "Quản lý  FTP Accounts" #3
-    "Quản lý  Database" #4
-    "Quản lý  PHP" #5
-    "Quản lý  Apache" #6
-    "Thiết lập Backup" #7
-    "Thiết lập AutoCheck" #8
+    "Quản lý tên miền"
+    "Quản lý SSL"
+    "Quản lý SSH/SFTP"
+    "Quản lý FTP Accounts"
+    "Quản lý Database"
+    "Quản lý Services"
 )
 PS3="
--//- Nhập lựa chọn của bạn (1-${#options[@]}) [Ctrl+C=Thoát]: "
+$arrow Nhập lựa chọn của bạn (1-${#options[@]}) [0=Thoát]: "
 select opt in "${options[@]}"
 do
     case $opt in
@@ -58,17 +50,8 @@ do
             '/usr/local/mbmenu/mbdatabase'
             ;;
         "${options[5]}")
-            '/usr/local/mbmenu/mbphp'
+            '/usr/local/mbmenu/mbservice'
             ;;
-        "${options[6]}")
-            '/usr/local/mbmenu/mbapache'
-            ;;
-	"${options[7]}")
-            '/usr/local/mbmenu/mbbackup'
-            ;;
-	"${options[8]}")
-	 '/usr/local/mbmenu/mbautocheck'
-	 ;;
         *) exit 1;;
     esac
 done

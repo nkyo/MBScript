@@ -1,0 +1,20 @@
+#!/bin/bash
+clear
+echo "      __  __       _   ____               _   _ ______ _______ "
+echo "     |  \/  |     | | |  _ \             | \ | |  ____|__   __|"
+echo "     | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   "
+echo "     | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   "
+echo "     | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   "
+echo "     |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   "
+echo ""
+echo "========================================================================="
+echo "5. Quản lý database > Danh sách database"
+echo "-------------------------------------------------------------------------"
+echo ""
+echo "Danh sách Database trên máy chủ:"
+db_admin_password=$(cat /usr/local/mbmenu/data/.my.cnf)
+echo "---------------------------------------------------"
+mysql -u root -p"$db_admin_password" -e "show databases where \`database\` not in('information_schema', 'test', 'sys', 'phpmyadmin', 'mysql', 'performance_schema')"
+echo "---------------------------------------------------"
+read -n 1 -s -r -p "Ấn phím bất kì để quay lại menu - [CTRL+C] để thoát" $back
+/usr/local/mbmenu/mbdatabase

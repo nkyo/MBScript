@@ -1,0 +1,85 @@
+#!/bin/bash
+#######################################################
+# MBScript main menu
+#######################################################
+. /usr/local/mbmenu/functions #goi chuc nang
+
+
+if [[ ! $1 ]]; then
+   clear
+fi
+echo "#    __  __       _   ____               _   _ ______ _______ #"
+echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
+echo "#   | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   #"
+echo "#   | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   #"
+echo "#   | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   #"
+echo "#   |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   #"
+echo ""
+echo "========================================================================="
+echo "                MBScript v$version - Cong cu quan ly VPS"
+echo "                      MBscript URL"
+echo "-------------------------------------------------------------------------"
+echo "Status: $status | Disk: ${use_disk}/${total_disk} GB | Ram: ${use_ram}/${total_ram} MB | Swap: ${use_swap}/${total_swap} MB"
+echo "-------------------------------------------------------------------------"
+echo "Huong dan: /documentation"
+echo "//---------------------------------------------------------------------//"
+clear
+echo "--//---------------------------------------------------------------------"
+echo "1. Quan ly Domain > Them domain"
+echo "-------------------------------------------------------------------------"
+echo
+
+nginx="$(systemctl status nginx.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+phpfpm="$(systemctl status php-fpm.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+mariadb="$(systemctl status mariadb.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+if [[ "$nginx" != 'active' ]] || [[ "$phpfpm" != 'active' ]] || [[ "$mariadb" != 'active' ]]; then
+clear
+echo "-------------------------------------------------------------------------"
+echo "Warning!!!"
+echo "-------------------------------------------------------------------------"
+echo "Kiem tra lai cac service dang hoat dong:"
+echo "/------------------------------------------------------------------------/"
+echo "Nginx: $nginx"
+echo "PHP-FPM: $phpfpm"
+echo "MariaDB: $mariadb"
+echo "/------------------------------------------------------------------------/"
+sleep 3
+action_domain 
+fi
+    
+domain=$1
+if [ -z "$domain" ]; then
+read -p "Nhap domain hoac subdomain can them vao 
+   [0=Thoat]: " domain
+fi
+
+
+if [[ "$domain" = "0" ]]; then
+    clear
+    action_domain
+fi
+
+if [ "$domain" = '' ]; then
+    clear
+    echo "Ban chua nhap Domain."
+    echo
+    action_domain
+fi
+
+if [ "$domain" = "${domain/.}" ]; then
+    clear
+    echo "Domain ban nhap khong dung dinh dang."
+    echo
+    action_domain
+fi
+
+# kiem tra ton tai
+path="/usr/local/mbmenu/user/.$domain.conf"
+if [[ -f "$path" ]]; then
+    clear
+    echo "Domain da ton tai tren server."
+    echo
+    action_domain
+fi
+
+. /usr/local/mbmenu/action/domain/add_temp $domain

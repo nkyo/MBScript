@@ -1,43 +1,37 @@
 #!/bin/bash
 #######################################################
-# MBScript main menu
+# MBScript
 #######################################################
-. /usr/local/mbmenu/functions #goi chuc nang
-
+. /usr/local/mbmenu/bin/func
 if [[ ! $1 ]]; then
    clear
 fi
-
-clear
-echo "#    __  __       _   ____               _   _ ______ _______ #"
-echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
-echo "#   | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   #"
-echo "#   | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   #"
-echo "#   | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   #"
-echo "#   |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   #"
+echo "      __  __       _   ____               _   _ ______ _______ "
+echo "     |  \/  |     | | |  _ \             | \ | |  ____|__   __|"
+echo "     | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   "
+echo "     | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   "
+echo "     | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   "
+echo "     |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   "
 echo ""
 echo "========================================================================="
-echo "                MBScript v$version - Cong cu quan ly VPS"
-echo "                      MBscript URL"
+echo "                MBScript v$version - Công cụ Quản lý máy chủ"
 echo "-------------------------------------------------------------------------"
-echo "Status: $status | Disk: ${use_disk}/${total_disk} GB | Ram: ${use_ram}/${total_ram} MB | Swap: ${use_swap}/${total_swap} MB"
+echo "Disk: ${use_disk}/${total_disk} GB | FreeInodes: ${free_inode} | Ram: ${use_ram}/${total_ram} MB | LoadAvg(5m): $loadavg "
 echo "-------------------------------------------------------------------------"
-echo "- Quan ly SSL : $(apache2 -v | cut -f3 -d' ' | head -1) - $(systemctl status apache2.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
-echo "-----------------------------------------------------------------------"
-echo "Huong dan: /documentation"
-echo "//---------------------------------------------------------------------//"
+echo "Hướng dẫn: /documentation"
+echo "-------------------------------------------------------------------------"
 echo
 
 options=(
-    "Cai SSL mien phi" #1
-    "Cai SSL paid" #2
+    "Cài SSL miễn phí" #1
+    "Cài SSL trả phí" #2
     "List SSL Free" #3
     "List SSL Paid" #5
-    "Quay lai"
+    "Quay lại"
 
 )
 PS3="
--//- Nhap lua chon cua ban (1-${#options[@]}) [Ctrl+C=Thoat]: "
+$arrow Nhập lựa chọn của bạn (1-${#options[@]}) [Ctrl+C=Thoat]: "
 select opt in "${options[@]}"
 do
         case $opt in

@@ -1,0 +1,33 @@
+#!/bin/bash
+listftp="/usr/local/mbmenu/bin/ftp/listftp"
+clear
+. /usr/local/mbmenu/bin/functions
+echo "#    __  __       _   ____               _   _ ______ _______ #"
+echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
+echo "#   | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   #"
+echo "#   | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   #"
+echo "#   | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   #"
+echo "#   |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   #"
+echo ""
+echo "========================================================================="
+echo "4. Quản lý FTP > Thêm tài khoản FTP"
+echo "-------------------------------------------------------------------------"
+echo ""
+
+read -p "1. Nhập tên tài khoản FTP: " user
+read -p "2. Mật khẩu: " passwd
+read -p "Xác nhận thêm tài khoản FTP? (y/n): " confirm
+
+if ! [ "$passwd" = '' ];
+then
+echo "Mật khẩu không được để trống! Vui lòng thử lại."
+sleep 3
+/usr/local/mbmenu/bin/ftp/add_ftp_user
+fi
+if [ "$user" = '' ];
+then
+echo "Vui lòng nhập tên user FTP!"
+sleep 3
+/usr/local/mbmenu/bin/ftp/add_ftp_user
+fi
+. /usr/local/mbmenu/bin/ftp/creat_ftp_user $user $passwd
