@@ -1,0 +1,32 @@
+#!/bin/bash
+domain=$1
+docroot="/home/admin/domains/$domain"
+docssl="/root/.acme.sh/$domain"
+listssllet="/usr/local/mbmenu/bin/ssl/listssllet"
+~/.acme.sh/acme.sh --issue --force  -d $domain -w /home/admin/domains/$domain/public_html
+if [[ ! -f /root/.acme.sh/$domain/fullchain.cer ]]; then
+clear
+echo "Cai dat Let's Encrypt that bai"
+sleep 5
+/usr/local/mbmenu/mbssl
+fi
+
+mv -S $docssl/${domain}.cer $docroot/ssl/${domain}.crt
+mv -S $docssl/${domain}.key $docroot/ssl/${domain}.key
+
+chown www-data.www-data $docroot/ssl/${domain}.crt
+chmod 644 $docroot/ssl/${domain}.crt
+chown www-data.www-data $docroot/ssl/${domain}.key
+chmod 644 $docroot/ssl/${domain}.key
+
+systemctl restart apache2.service
+    if ! grep -R "$domain" $listssllet > /dev/null 2>&1
+                         then
+              echo "$domain" >> "$listssllet"
+    fi
+
+echo "Kich hoat SSL mien phi cho $domain thanh cong!!!"
+echo "Quay ve menu chinh..."
+sleep 2
+clear
+/usr/local/mbmenu/mbssl
