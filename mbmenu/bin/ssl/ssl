@@ -1,0 +1,67 @@
+#!/bin/bash
+clear
+echo "#    __  __       _   ____               _   _ ______ _______ #"
+echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
+echo "#   | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   #"
+echo "#   | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   #"
+echo "#   | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   #"
+echo "#   |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   #"
+echo ""
+echo "========================================================================="
+echo "                MBScript v$version - Cong cu quan ly VPS"
+echo "                      MBscript URL"
+echo "-------------------------------------------------------------------------"
+echo "Status: $status | Disk: ${use_disk}/${total_disk} GB | Ram: ${use_ram}/${total_ram} MB | Swap: ${use_swap}/${total_swap} MB"
+echo "-------------------------------------------------------------------------"
+echo "- 1. Quan ly SSL : $(apache2 -v | cut -f3 -d' ' | head -1) - $(systemctl status apache2.service | grep 'Active' | cut -f2 -d':' | xargs | cut -f1 -d' ' | xargs)"
+echo "-----------------------------------------------------------------------"
+echo "Huong dan: /documentation"
+echo "//---------------------------------------------------------------------//"
+echo
+echo "--//---------------------------------------------------------------------"
+echo "1. Quan ly SSL > Paid SSL"
+echo "-------------------------------------------------------------------------"
+echo "/-----------------------------------------------------------------------/"
+echo
+domain=$1
+docroot="/home/admin/domains/$domain"
+docsslpaid= "/home/admin/domains/$domain/tmp/"
+listsslpaid="/usr/local/mbmenu/bin/ssl/listsslpaid"
+
+echo "De kich hoat SSL tu nha cung cap khac, ban can upload cac file theo dung dinh dang vao thu muc sau"
+echo "File chung chi tu nha cung cap ${domain}.crt va ${domain}.key vao thu muc /home/admin/domains/$domain/tmp/"
+
+options=(
+    "Da upload cac file SSL hoan tat" #1
+    "Thoat ra va tien hanh upload file" #2
+        "Quay lai" #3
+
+)
+
+PS3="
+-//- Nhap lua chon cua ban (1-${#options[@]}) [Ctrl+C=Thoat]: "
+select opt in "${options[@]}"
+do
+        case $opt in
+        "${options[0]}")
+                        mv $docsslpaid/${domain}.crt $doroot/ssl/${domain}.crt
+                        mv $docsslpaid/${domain}.key $doroot/ssl/${domain}.key
+
+                        systemctl restart apache2.service
+
+                if ! grep -R "$domain" $listsslpaid > /dev/null 2>&1
+then
+
+        echo "$domain" >> "$listsslpaid"
+                fi
+                        ;;
+                "${options[1]}")
+            '/usr/local/bin/mb'
+            ;;
+            "${options[2]}")
+            '/usr/local/mbmenu/mbssl'
+            ;;
+
+        *) exit 1;;
+    esac
+done
