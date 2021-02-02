@@ -4,7 +4,7 @@ export LANGUAGE=en_US.UTF-8
 export LC_ALL=en_US.UTF-8
 export LANG=en_US.UTF-8
 export LC_TYPE=en_US.UTF-8
-listdomain=/usr/local/mbmenu/action/domain/listdomain
+
 trash=/home/admin/3days.trash
 arrow=$(echo -e '\u2192')
 cpu=$(top -bn1 | grep "Cpu(s)" | sed "s/.*, *\([0-9.]*\)%* id.*/\1/" |  awk '{print 100 - $1"%"}')
@@ -19,3 +19,7 @@ use_disk=$(df -T -h | grep $disk | awk -F ' ' '{print $4}' | tr -d 'a-zA-G')
 total_ram=$(free -m | grep "Mem" | awk -F ' ' '{print $2}')
 use_ram=$(free -m | grep "Mem" | awk -F ' ' '{print $3}')
 memAvailable=$(cat /proc/meminfo | grep 'MemAvailable' |cut -f2 -d':' | xargs | cut -f1 -d' ')
+#fuction domain
+docroot="/home/admin/domains/$domain"
+listdomain="/usr/local/mbmenu/bin/domain/listdomain"
+defaulthtml="/usr/local/mbmenu/bin/domain/default.html"

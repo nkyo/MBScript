@@ -1,4 +1,5 @@
 #!/bin/bash
+. /usr/local/mbmenu/bin/func
 chon_php () {
 echo "Vui lòng chọn phiên bản PHP-FPM (5.6 -> 7.4)"
 echo "1. PHP-FPM 5.6"
@@ -55,7 +56,7 @@ read -p "Nhập tên miền bạn muốn thêm (ví dụ: matbao.net, wiki.matba
 fi
 if [ "$domain" = "5" ];
 then
-echo "Quay lai menu chinh..."
+echo "Quay lại menu chính..."
 sleep 5
 /usr/local/mbmenu/mbdomain
 fi
@@ -65,14 +66,13 @@ echo "Vui lòng nhập tên miền."
 sleep 5
 /usr/local/mbmenu/bin/domain/create_vhost
 fi
-if [ "$domain" = '${domain/.}' ];
+if [ "$domain" = "${domain/.}" ];
 then
 echo "Tên miền bạn nhập không đúng, vui lòng thử lại!!!"
 sleep 3
 /usr/local/mbmenu/bin/domain/create_vhost
 fi
-dir="/home/admin/conf/$domain.conf"
-if [[ -f "$dir" ]];
+if grep -Rw $listdomain -e $domain >/dev/null 2>&1
 then
 echo "Tên miền này đã tồn tại trên hệ thống, vui lòng thử lại!!"
 sleep 3

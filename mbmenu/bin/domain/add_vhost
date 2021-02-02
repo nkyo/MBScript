@@ -1,9 +1,7 @@
 #!/bin/bash
+. /usr/local/mbmenu/bin/func
 domain=$1
 php_version=$2
-dirdefaultfile="/usr/local/mbmenu/bin/domain/default.html"
-docroot="/home/admin/domains/$domain"
-listdomain="/usr/local/mbmenu/bin/domain/listdomain"
 mkdir -p $docroot/public_html
 mkdir -p $docroot/ftp
 mkdir -p $docroot/logs
@@ -19,7 +17,7 @@ chmod 700 $docroot/ssl
 chmod 700 $docroot/tmp
 chmod 700 $docroot/session
 chmod 700 $docroot/backup
-cp $dirdefaultfile $docroot/public_html
+cp $defaulthtml $docroot/public_html
 #add vhost
 . /usr/local/mbmenu/bin/domain/tem_vhost $domain $php_version
 echo "$domain" >> "$listdomain"
