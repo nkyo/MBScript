@@ -31,16 +31,16 @@ fi
 
 if grep $listdomain -e $domain >/dev/null 2>&1
 then
-    echo -n "Bạn có chắc chắn muốn xóa $domain? (Y/n): "
+    echo -n "Thực hiện xóa $domain (Dữ liệu sẽ không thể khôi phục) - Vui lòng nhập mã xác nhận "$rg_string": "
 	read ok
 
-		if [ $ok = "Y" -o $ok = "y" ];
+		if [ $ok = $rg_string ];
 		then
 		echo "Đang xóa tên miền $domain..."
 		sleep 3
 
 		rm -rf /home/admin/conf/$domain.conf
-		mv /home/admin/domains/$domain /home/admin/3days.trash/
+		rm -rf /home/admin/domains/$domain
 		sed -i '/'$domain'/d' $listdomain
 
 		/etc/init.d/apache2 restart >/dev/null 2>&1
@@ -48,8 +48,8 @@ then
 		echo "Đã xóa tên miền $domain"
 		sleep 2
 		/usr/local/mbmenu/mbdomain
-		else [ $ok = "n" -o $ok = "N" ];
-		echo "Quay lại menu"
+		else [ $ok != $rg_string ];
+		echo "Nhập sai mã xác nhận!!! - Quay lại Menu..."
 		sleep 3
 		/usr/local/mbmenu/mbdomain
 		fi
