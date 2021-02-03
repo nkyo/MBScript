@@ -29,12 +29,12 @@ echo "-------------------------"
 read -p "Nhập tên miền cần xóa [5=Quay lại]: " domain
 fi
 
-if grep $listdomain -e $domain >/dev/null 2>&1
+if grep $listdomain -we $domain >/dev/null 2>&1
 then
     echo -n "Thực hiện xóa $domain (Dữ liệu sẽ không thể khôi phục) - Vui lòng nhập mã xác nhận "$rg_string": "
 	read ok
 
-		if [ $ok = $rg_string ];
+		if [ $ok = $rg_string ] >/dev/null 2>&1;
 		then
 		echo "Đang xóa tên miền $domain..."
 		sleep 3
@@ -48,11 +48,17 @@ then
 		echo "Đã xóa tên miền $domain"
 		sleep 2
 		/usr/local/mbmenu/mbdomain
-		else [ $ok != $rg_string ];
+		else [ $ok != $rg_string ] >/dev/null 2>&1;
 		echo "Nhập sai mã xác nhận!!! - Quay lại Menu..."
 		sleep 3
+		clear
 		/usr/local/mbmenu/mbdomain
 		fi
+elif [ $domain = '5' ]>/dev/null 2>&1;
+then
+	echo "Quay lại menu chính..."
+	sleep 3
+	/usr/local/mbmenu/mbdomain
 else
 	echo "Tên miền không tồn tại trên máy chủ, vui lòng nhập lại!!!"
 	sleep 4
