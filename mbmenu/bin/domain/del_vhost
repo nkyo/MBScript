@@ -22,7 +22,9 @@ domain=$1
 
 if [ -z "$domain" ]; then
 echo "----Danh sách tên miền----"
-cat $listdomain
+
+awk '{print NR  "> " $s}' $listdomain
+
 echo "-------------------------"
 read -p "Nhập tên miền cần xóa [5=Quay lại]: " domain
 fi
