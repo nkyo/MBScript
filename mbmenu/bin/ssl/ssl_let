@@ -3,20 +3,21 @@ domain=$1
 docroot="/home/admin/domains/$domain"
 docssl="/root/.acme.sh/$domain"
 listssllet="/usr/local/mbmenu/bin/ssl/listssllet"
-~/.acme.sh/acme.sh --issue --force  -d $domain -w /home/admin/domains/$domain/public_html
+~/.acme.sh/acme.sh --issue --force  -d $domain -w /home/admin/domains/$domain/public_html > /dev/null 2>&1
+echo "Đang cài đặt SSL miễn phí cho tên miền $domain... "
 if [[ ! -f /root/.acme.sh/$domain/fullchain.cer ]]; then
 clear
-echo "Cai dat Let's Encrypt that bai"
+echo "Không thể cài đặt SSL miễn phí, vui lòng chắc chắn tên miền đã được cấu hình về địa chỉ IP của máy chủ!"
 sleep 5
 /usr/local/mbmenu/mbssl
 fi
 
-mv -S $docssl/${domain}.cer $docroot/ssl/${domain}.crt
-mv -S $docssl/${domain}.key $docroot/ssl/${domain}.key
+mv -f $docssl/${domain}.cer $docroot/ssl/${domain}.crt
+mv -f $docssl/${domain}.key $docroot/ssl/${domain}.key
 
-chown www-data.www-data $docroot/ssl/${domain}.crt
+chown www-data:www-data $docroot/ssl/${domain}.crt
 chmod 644 $docroot/ssl/${domain}.crt
-chown www-data.www-data $docroot/ssl/${domain}.key
+chown www-data:www-data $docroot/ssl/${domain}.key
 chmod 644 $docroot/ssl/${domain}.key
 
 systemctl restart apache2.service
@@ -25,8 +26,20 @@ systemctl restart apache2.service
               echo "$domain" >> "$listssllet"
     fi
 
-echo "Kich hoat SSL mien phi cho $domain thanh cong!!!"
-echo "Quay ve menu chinh..."
+echo "Kích hoạt SSL miễn phí cho tên miền $domain thành công!!!"
+read -p "Bạn có muốn cấu hình chuyển hướng tự động từ http:// sang https:// không? (y/n) " confirm
+if [[ "$confirm" = "y" ]]; then
+echo "Đang cấu hình chuyển hướng từ http:// sang https://"
+echo RewriteEngine On >> $docroot/public_html/.htaccess
+echo RewriteCond %{HTTPS} !=on >> $docroot/public_html/.htaccess
+echo "RewriteRule ^(.*)$ https://%{HTTP_HOST}%{REQUEST_URI} [L,R=301,NE]" >> $docroot/public_html/.htaccess
+fi
+sleep 1
+echo "Cài đặt chuyển hướng https thành công. Vui lòng tham khảo thêm bài viết sau để cấu hình SSL hoàn chỉnh:"
+echo "Link hướng dẫn chuyển hướng https"
+read -n 1 -s -r -p "Ấn phím bất kì để quay lại menu - [CTRL+C] để thoát" $back
+
 sleep 2
 clear
 /usr/local/mbmenu/mbssl
+

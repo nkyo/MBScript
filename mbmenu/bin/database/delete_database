@@ -15,7 +15,7 @@ echo ""
 echo "Danh sách Database"
 db_admin_password=$(cat /usr/local/mbmenu/data/.my.cnf)
 echo "--------------------------------------------------"
-mysql -u root -p"$db_admin_password" -e "show databases where \`database\` not in('information_schema', 'test', 'sys', 'phpmyadmin', 'mysql', 'performance_schema')"
+mysql -u root -p"$db_admin_password" -e "show databases where \`database\` not in('information_schema', 'test', 'sys', 'phpmyadmin', 'mysql', 'performance_schema')" | tail -n+2 | awk '{print NR  "> " $s}'
 echo "--------------------------------------------------"
 
 read -p "Nhập tên database cần xóa: " database
@@ -33,4 +33,3 @@ if [[ "$confirm" = "y" ]]; then
     mysql -u root -p"$db_admin_password" -e "DROP DATABASE $database"
     echo "Đã xóa thành công database $database"
 fi
-

@@ -1,0 +1,6 @@
+#!/bin/bash
+Namedatabase="admin_nam"
+RESULT=`mysqlshow --user=root --password=VPQLytU7lbPKsDRT admin_nam| grep -v Wildcard | grep -o $Namedatabase`
+if [ "$RESULT" = "$Namedatabase" ]; then
+    echo "YES"
+fi

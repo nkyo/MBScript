@@ -37,14 +37,14 @@ if [ "$domain" = '' ];
 then
 echo "Vui long nhap ten mien."
 sleep 2
-/usr/local/mbmenu/action/ssl/free_ssl
+/usr/local/mbmenu/bin/ssl/free_ssl
 fi
 
 if [ "$domain" = '${domain/.}' ];
 then
 echo "Ten mien da nhap chua dung, vui long nhap lai!!!"
 sleep 2
-/usr/local/mbmenu/action/ssl/free_ssl
+/usr/local/mbmenu/bin/ssl/free_ssl
 fi
 
-. /usr/local/mbmenu/action/ssl/ssl $domain
+. /usr/local/mbmenu/bin/ssl/ssl $domain

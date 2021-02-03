@@ -36,16 +36,16 @@ select opt in "${options[@]}"
 do
         case $opt in
         "${options[0]}")
-            '/usr/local/mbmenu/action/ssl/free_ssl'
+            '/usr/local/mbmenu/bin/ssl/free_ssl'
             ;;
                 "${options[1]}")
-            '/usr/local/mbmenu/action/ssl/paid_ssl'
+            '/usr/local/mbmenu/bin/ssl/paid_ssl'
             ;;
                 "${options[2]}")
-            '/usr/local/mbmenu/action/ssl/listssllet'
+            '/usr/local/mbmenu/bin/ssl/list_ssl_free'
             ;;
             "${options[3]}")
-            '/usr/local/mbmenu/action/ssl/listsslpaid'
+            '/usr/local/mbmenu/bin/ssl/listsslpaid'
             ;;
             "${options[4]}")
             '/usr/local/mbmenu/mb'

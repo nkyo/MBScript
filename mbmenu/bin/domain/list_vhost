@@ -13,9 +13,7 @@ echo "1. Quản lý tên miền > Danh sách tên miền"
 echo "-------------------------------------------------------------------------"
 echo ""
 echo "--------------Danh sách tên miền--------------"
-
 awk '{print NR  "> " $s}' $listdomain
-
 echo "----------------------------------------------"
 
 read -n 1 -s -r -p "Ấn phím bất kì để quay lại menu - [CTRL+C] để thoát" $back

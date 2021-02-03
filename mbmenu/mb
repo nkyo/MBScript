@@ -2,7 +2,7 @@
 #######################################################
 # MBScript main menu
 #######################################################
-. /usr/local/mbmenu/functions
+. /usr/local/mbmenu/func
 if [[ ! $1 ]]; then
    clear
 fi

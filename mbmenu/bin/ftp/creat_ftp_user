@@ -1,15 +1,16 @@
 #!/bin/bash
 user=$1
 passwd=$2
-docroot="/home/admin/domains/$domain"
+
 listftp="/usr/local/mbmenu/bin/ftp/listftp"
 
 gen_user() {
-    head /dev/urandom | tr -dc 0-9 | head -c 4
+    head /dev/urandom | tr -dc 0-9 | head -c 5
 }
-userftp=$user_$gen_user
-echo $passwd | ftpasswd --stdin --passwd --name=$userftp --gid=60 --uid=60 --home=/home/admin/domains/ --shell=/bin/false --file=/etc/proftpd/ftpd.passwd
-. /usr/local/mbmenu/bin/functions
+usergen=$(gen_user)
+userftp=${user}_${usergen}
+echo $passwd | ftpasswd --stdin --passwd --name=$userftp --gid=33 --uid=33 --home=/home/admin/domains/ --shell=/bin/false --file=/etc/proftpd/ftpd.passwd
+. /usr/local/mbmenu/bin/func
 echo "#    __  __       _   ____               _   _ ______ _______ #"
 echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
 echo "#   | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   #"
@@ -21,7 +22,7 @@ echo "========================================================================="
 echo "4. Quản lý FTP > Thêm tài khoản FTP"
 echo "-------------------------------------------------------------------------"
 echo ""
-echo "Tạo User FTP $user thành công!!!"
+echo "Tạo User FTP $userftp thành công!!!"
 echo "---------------------------------"
 echo "Tên User: $userftp"
 echo "Mật khẩu: $passwd"

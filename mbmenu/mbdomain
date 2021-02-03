@@ -42,7 +42,8 @@ do
             '/usr/local/mbmenu/bin/domain/list_vhost'
             ;;
         "${options[3]}")
-			'/usr/local/mbmenu/mb'
+	clear
+       	    '/usr/local/mbmenu/mb'
         ;;
         *) 			
         echo "Vui lòng chọn các lựa chọn (1-${#options[@]}) !"
