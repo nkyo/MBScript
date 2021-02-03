@@ -41,7 +41,7 @@ do
         "${options[2]}")
             '/usr/local/mbmenu/bin/domain/list_vhost'
             ;;
-        "${options[4]}")
+        "${options[3]}")
 			'/usr/local/mbmenu/mb'
         ;;
         *) 			
