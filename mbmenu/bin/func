@@ -24,3 +24,5 @@ docroot="/home/admin/domains/$domain"
 listdomain="/usr/local/mbmenu/bin/domain/listdomain"
 defaulthtml="/usr/local/mbmenu/bin/domain/default.html"
 rg_string=$(tr -dc 0-9 </dev/urandom | head -c 5 ; echo '')
+#fucntion ssh
+og_port=$(cat /etc/ssh/sshd_config | grep "Port " | cut -f2 -d" ")

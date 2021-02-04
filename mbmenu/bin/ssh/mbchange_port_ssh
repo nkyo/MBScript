@@ -1,0 +1,50 @@
+#!/bin/bash
+clear
+. /usr/local/mbmenu/bin/func
+checkport=$(netstat -tlnp | grep $newport)
+echo "#    __  __       _   ____               _   _ ______ _______ #"
+echo "#   |  \/  |     | | |  _ \             | \ | |  ____|__   __|#"
+echo "#   | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   #"
+echo "#   | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   #"
+echo "#   | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   #"
+echo "#   |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   #"
+echo ""
+echo "========================================================================="
+echo "3. Quản lý SSH/SFTP > Thay đổi Port SSh cho máy chủ"
+echo "-------------------------------------------------------------------------"
+
+echo "Port Hiện tại đang sử dụng là: $og_port"
+
+read -p "Nhập port SSH cần thay đổi: " new_port
+
+if [ "$new_port" = '' ];
+then
+echo "Chưa nhập Port mới cần thay đổi - vui lòng nhập lại"
+sleep 4
+clear
+/usr/local/mbmenu/bin/ssh/mbchange_port_ssh
+fi
+
+if [[ ! "$new_port" =~ ^-?[0-9]+$ ]];
+then
+echo "Vui lòng nhập lại, chỉ nhập ký tự số (0-9)"
+sleep 4
+clear
+/usr/local/mbmenu/bin/ssh/mbchange_port_ssh
+fi
+
+if [ $checkport = 'null' ];
+then
+echo "Port đã được sử dụng bởi dịch vụ khác - Vui lòng nhập lại"
+sleep 4
+clear
+/usr/local/mbmenu/bin/ssh/mbchange_port_ssh
+
+else
+sed -i 's/Port/Port $new_port/g' /etc/ssh/sshd_config
+serivce sshd restart
+echo "Đã thay đổi sang Port SSH mới $new_port hoàn tất!!!"
+echo "Quay lai menu chính..."
+sleep 5
+fi
+/usr/local/mbmenu/mbssh

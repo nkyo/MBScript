@@ -1,0 +1,56 @@
+#!/bin/bash
+#######################################################
+# MBScript
+#######################################################
+. /usr/local/mbmenu/bin/func
+if [[ ! $1 ]]; then
+   clear
+fi
+echo "      __  __       _   ____               _   _ ______ _______ "
+echo "     |  \/  |     | | |  _ \             | \ | |  ____|__   __|"
+echo "     | \  / | __ _| |_| |_) | __ _  ___  |  \| | |__     | |   "
+echo "     | |\/| |/ _  | __|  _ < / _  |/ _ \ | .   |  __|    | |   "
+echo "     | |  | | (_| | |_| |_) | (_| | (_) _| |\  | |____   | |   "
+echo "     |_|  |_|\__,_|\__|____/ \__,_|\___(_|_| \_|______|  |_|   "
+echo ""
+echo "========================================================================="
+echo "                MBScript v$version - Công cụ Quản lý máy chủ"
+echo "-------------------------------------------------------------------------"
+echo "Disk: ${use_disk}/${total_disk} GB | FreeInodes: ${free_inode} | Ram: ${use_ram}/${total_ram} MB | LoadAvg(5m): $loadavg "
+echo "-------------------------------------------------------------------------"
+echo "Hướng dẫn: /documentation"
+echo "-------------------------------------------------------------------------"
+echo
+options=(
+    "Thay đổi mật khẩu SSH"
+    "Thay đổi Port cho SSH"
+    "Kích hoạt SSH bằng Key"
+    "Quay lại"
+)
+PS3="
+$arrow Nhập lựa chọn của bạn (1-${#options[@]}) [Ctrl+C=Thoat]: "
+select opt in "${options[@]}"
+do
+    case $opt in
+        "${options[0]}")
+            '/usr/local/mbmenu/bin/ssh/mbchange_pass_ssh'
+            ;;
+        "${options[1]}")
+            '/usr/local/mbmenu/bin/ssh/mbchange_port_ssh'
+            ;;
+        "${options[2]}")
+            '/usr/local/mbmenu/bin/ssh/mbssh_key'
+            ;;
+        "${options[3]}")
+	clear
+       	    '/usr/local/mbmenu/mb'
+        ;;
+        *) 			
+        echo "Vui lòng chọn các lựa chọn (1-${#options[@]}) !"
+        sleep 2
+        clear
+        '/usr/local/mbmenu/mbssh'
+        ;;	
+    esac
+done
+
