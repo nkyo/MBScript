@@ -26,12 +26,32 @@ echo "----Danh sách tên miền----"
 awk '{print NR  "> " $s}' $listdomain
 
 echo "-------------------------"
-read -p "Nhập tên miền cần xóa [5=Quay lại]: " domain
+read -p "Nhập số thứ tự của tên miền cần xóa [0=Quay lại]: " number
 fi
 
-if grep $listdomain -we $domain >/dev/null 2>&1
+
+if [[ $number =~ ^[0-9]+$ ]];
 then
-    echo -n "Thực hiện xóa $domain (Dữ liệu sẽ không thể khôi phục) - Vui lòng nhập mã xác nhận "$rg_string": "
+	echo
+else
+echo "Nhập sai định dạng!!!"
+read -p "Vui lòng nhập số thứ tự của tên miền cần xóa [0=Quay lại]: " number
+fi
+
+if [ $number = '0' ]>/dev/null 2>&1;
+then
+	echo "Quay lại menu chính..."
+	sleep 3
+	/usr/local/mbmenu/mbdomain
+else
+	searchdomain=$(sed -n "$number"p $listdomain)
+fi
+
+
+
+if grep $listdomain -we $searchdomain >/dev/null 2>&1
+then
+    echo -n "Thực hiện xóa $searchdomain (Dữ liệu sẽ không thể khôi phục) - Vui lòng nhập mã xác nhận "$rg_string": "
 	read ok
 
 		if [ $ok = $rg_string ] >/dev/null 2>&1;
@@ -39,9 +59,9 @@ then
 		echo "Đang xóa tên miền $domain..."
 		sleep 3
 
-		rm -rf /home/admin/conf/$domain.conf
-		rm -rf /home/admin/domains/$domain
-		sed -i '/'$domain'/d' $listdomain
+		rm -rf /home/admin/conf/$searchdomain.conf >/dev/null 2>&1
+		rm -rf /home/admin/domains/$searchdomain >/dev/null 2>&1
+		sed -i '/'$searchdomain'/d' $listdomain 
 
 		/etc/init.d/apache2 restart >/dev/null 2>&1
 
@@ -54,14 +74,9 @@ then
 		clear
 		/usr/local/mbmenu/mbdomain
 		fi
-elif [ $domain = '5' ]>/dev/null 2>&1;
-then
-	echo "Quay lại menu chính..."
-	sleep 3
-	/usr/local/mbmenu/mbdomain
 else
 	echo "Tên miền không tồn tại trên máy chủ, vui lòng nhập lại!!!"
 	sleep 4
 	clear
 	/usr/local/mbmenu/bin/domain/del_vhost
-fi
+	fi
