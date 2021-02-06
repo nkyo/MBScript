@@ -1,2 +1,0 @@
-crontab -l | grep -v '/bin/bash /usr/local/mbmenu/action/autocheck/startcheck >> /usr/local/mbmenu/logs/autocheck.log 2>&1'  | crontab
-echo "remove cronjob autocheck"
